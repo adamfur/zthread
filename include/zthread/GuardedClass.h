@@ -29,7 +29,7 @@ namespace ZThread {
 
   /**
    * @class GuardedClass
-   * @author Eric Crahen <crahen@cse.buffalo.edu>
+   * @author Eric Crahen <http://www.code-foo.com>
    * @date <2003-07-20T20:17:34-0400>
    * @version 2.3.0
    *

@@ -32,7 +32,7 @@ namespace ZThread {
   /**
    * @class FastRecursiveMutex
    *
-   * @author Eric Crahen <crahen@cse.buffalo.edu>
+   * @author Eric Crahen <http://www.code-foo.com>
    * @date <2003-07-19T19:00:25-0400>
    * @version 2.2.0
    *

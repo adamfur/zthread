@@ -43,7 +43,7 @@ namespace ZThread {
 
 /**
  * @class LocalStaticInstantiation
- * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @author Eric Crahen <http://www.code-foo.com>
  * @date <2003-07-16T17:57:45-0400>
  * @version 2.2.0 
  *
@@ -88,7 +88,7 @@ class StaticInstantiationHelper {
 
 /**
  * @class StaticInstantiation
- * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @author Eric Crahen <http://www.code-foo.com>
  * @date <2003-07-16T17:57:45-0400>
  * @version 2.2.0 
  *
@@ -147,7 +147,7 @@ Destroyer<T>::~Destroyer() {
 
 /**
  * @class LazyInstantiation
- * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @author Eric Crahen <http://www.code-foo.com>
  * @date <2003-07-16T17:57:45-0400>
  * @version 2.2.0
  *
@@ -181,7 +181,7 @@ protected:
   
 /**
  * @class Singleton
- * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @author Eric Crahen <http://www.code-foo.com>
  * @date <2003-07-16T17:57:45-0400>
  * @version 2.2.0 
  *

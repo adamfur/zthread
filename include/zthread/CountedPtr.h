@@ -32,7 +32,7 @@ namespace ZThread {
   /**
    * @class CountedPtr
    *
-   * @author Eric Crahen <crahen@cse.buffalo.edu>
+   * @author Eric Crahen <http://www.code-foo.com>
    * @date <2003-07-26T07:00:10-0400>
    * @version 2.3.0
    *

@@ -32,7 +32,7 @@ namespace ZThread {
   /**
    * @class FairReadWriteLock
    *
-   * @author Eric Crahen <crahen@cse.buffalo.edu>
+   * @author Eric Crahen <http://www.code-foo.com>
    * @date <2003-07-16T10:26:25-0400>
    * @version 2.2.7
    *  

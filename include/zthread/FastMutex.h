@@ -31,7 +31,7 @@ namespace ZThread {
 
   /**
    * @class FastMutex
-   * @author Eric Crahen <crahen@cse.buffalo.edu>
+   * @author Eric Crahen <http://www.code-foo.com>
    * @date <2003-07-19T18:45:39-0400>
    * @version 2.2.0
    *

@@ -29,7 +29,7 @@ namespace ZThread {
 
 /**
  * @class Monitor
- * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @author Eric Crahen <http://www.code-foo.com>
  * @date <2003-07-18T08:16:09-0400>
  * @version 2.2.8
  */

@@ -39,7 +39,7 @@ namespace ZThread {
 
 /**
  * @class LockHolder
- * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @author Eric Crahen <http://www.code-foo.com>
  * @date <2003-07-16T17:55:42-0400>
  * @version 2.2.0
  *
@@ -87,7 +87,7 @@ class LockHolder {
 
 /**
  * @class CompoundScope
- * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @author Eric Crahen <http://www.code-foo.com>
  * @date <2003-07-16T17:55:42-0400>
  * @version 2.2.0
  *
@@ -134,7 +134,7 @@ class CompoundScope {
 
 /**
  * @class LockedScope
- * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @author Eric Crahen <http://www.code-foo.com>
  * @date <2003-07-16T17:55:42-0400>
  * @version 2.2.0
  *
@@ -200,7 +200,7 @@ class LockedScope {
 
 /**
  * @class UnlockedScope
- * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @author Eric Crahen <http://www.code-foo.com>
  * @date <2003-07-16T17:55:42-0400>
  * @version 2.2.0
  *
@@ -255,7 +255,7 @@ class UnlockedScope {
 
 /**
  * @class TimedLockedScope
- * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @author Eric Crahen <http://www.code-foo.com>
  * @date <2003-07-16T17:55:42-0400>
  * @version 2.2.0
  *
@@ -299,7 +299,7 @@ class TimedLockedScope {
 
 /**
  * @class OverlappedScope
- * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @author Eric Crahen <http://www.code-foo.com>
  * @date <2003-07-16T17:55:42-0400>
  * @version 2.2.0
  *
@@ -332,7 +332,7 @@ class OverlappedScope {
 
 /**
  * @class Guard
- * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @author Eric Crahen <http://www.code-foo.com>
  * @date <2003-07-16T17:55:42-0400>
  * @version 2.2.0
  *

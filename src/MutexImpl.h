@@ -34,7 +34,7 @@ namespace ZThread {
 
 
 /**
- * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @author Eric Crahen <http://www.code-foo.com>
  * @date <2003-07-16T19:52:12-0400>
  * @version 2.2.11
  * @class NullBehavior
@@ -53,7 +53,7 @@ protected:
 };
 
 /**
- * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @author Eric Crahen <http://www.code-foo.com>
  * @date <2003-07-16T19:52:12-0400>
  * @version 2.2.11
  * @class MutexImpl

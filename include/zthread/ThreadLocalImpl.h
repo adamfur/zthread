@@ -28,7 +28,7 @@ namespace ZThread {
 
   /**
    * @class ThreadLocalImpl
-   * @author Eric Crahen <crahen@cse.buffalo.edu>
+   * @author Eric Crahen <http://www.code-foo.com>
    * @date <2003-07-27T10:23:19-0400>
    * @version 2.3.0
    *

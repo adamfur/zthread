@@ -26,7 +26,7 @@ namespace ZThread {
 
   /**
    * @class NonCopyable
-   * @author Eric Crahen <crahen@cse.buffalo.edu>
+   * @author Eric Crahen <http://www.code-foo.com>
    * @date <2003-07-16T19:36:00-0400>
    * @version 2.2.11
    *

@@ -29,7 +29,7 @@ namespace ZThread {
 
 /**
  * @class DeferredInterruptionScope
- * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @author Eric Crahen <http://www.code-foo.com>
  * @date <2003-07-16T19:45:18-0400>
  * @version 2.3.0
  *

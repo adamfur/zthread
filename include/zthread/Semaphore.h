@@ -31,7 +31,7 @@ namespace ZThread {
  
   /**
    * @class Semaphore
-   * @author Eric Crahen <crahen@cse.buffalo.edu>
+   * @author Eric Crahen <http://www.code-foo.com>
    * @date <2003-07-16T15:28:01-0400>
    * @version 2.2.1
    *

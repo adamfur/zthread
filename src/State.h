@@ -26,7 +26,7 @@ namespace ZThread {
 
 /**
  * @class State 
- * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @author Eric Crahen <http://www.code-foo.com>
  * @date <2003-07-16T20:04:01-0400>
  * @version 2.2.1
  *
