@@ -147,7 +147,7 @@ namespace ZThread {
       // Add the current thread to the joiner list
       ThreadImpl* impl = current();
       _joiners.push_back(impl);
-      ZTDEBUG("00\n");
+
       Monitor::STATE result;
 
       { // Release this ThreadImpl's lock while the joiner sleeps
