@@ -24,7 +24,6 @@
 
 #include "zthread/CountedPtr.h"
 #include "zthread/Cancelable.h"
-#include "zthread/Handle.h"
 #include "zthread/Priority.h"
 #include "zthread/NonCopyable.h"
 
@@ -36,7 +35,7 @@ namespace ZThread {
    * @class Thread
    *
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-07T21:53:36-0400>
+   * @date <2003-07-08T09:52:13-0400>
    * @version 2.3.0
    *
    */
@@ -68,7 +67,7 @@ namespace ZThread {
    * @class Thread
    *
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-07T21:53:36-0400>
+   * @date <2003-07-08T09:52:13-0400>
    * @version 2.3.0
    *
    */
