@@ -59,8 +59,8 @@ namespace ZThread {
         
         threadsWaiting = !_userThreads.empty() || !_pendingThreads.empty();
         
-        ZTDEBUG("Wait required:   %d\n", waitRequired);
-        ZTDEBUG("Threads waiting: %d\n", threadsWaiting);
+        //ZTDEBUG("Wait required:   %d\n", waitRequired);
+        //ZTDEBUG("Threads waiting: %d\n", threadsWaiting);
         
         // Auto-cancel any active threads at the time main() goes out of scope
         // "force" a gentle exit from the executing tasks; eventually the user- 
@@ -88,7 +88,7 @@ namespace ZThread {
     // Wait for all the users threads to get into the appropriate state
     if(threadsWaiting) {
 
-      ZTDEBUG("Threads waiting: %d %d\n", _userThreads.size(), _pendingThreads.size());
+      //ZTDEBUG("Threads waiting: %d %d\n", _userThreads.size(), _pendingThreads.size());
       Monitor& m = _waiter->getMonitor();
       
       // Defer interruption while this thread waits for a signal from
@@ -232,7 +232,7 @@ namespace ZThread {
       if( !(hasWaiter = (_waiter != 0)) ) {
 
         _shutdownTasks.push_back(task);
-        ZTDEBUG("1 shutdown task added. %d\n", _shutdownTasks.size());
+        //ZTDEBUG("1 shutdown task added. %d\n", _shutdownTasks.size());
         
       }
 
@@ -253,7 +253,7 @@ namespace ZThread {
     if(removed)
       _shutdownTasks.erase(i);
 
-    ZTDEBUG("1 shutdown task removed (%d)-%d\n", removed, _shutdownTasks.size());
+    //ZTDEBUG("1 shutdown task removed (%d)-%d\n", removed, _shutdownTasks.size());
     
     return removed;
 

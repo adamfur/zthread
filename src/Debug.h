@@ -25,7 +25,7 @@
 #  include <stdio.h>
 #  define ZTDEBUG printf
 #else
-#  define ZTDEBUG
+#  define ZTDEBUG(x) 
 #endif
 
 #endif
