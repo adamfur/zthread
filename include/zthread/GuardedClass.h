@@ -30,7 +30,7 @@ namespace ZThread {
   /**
    * @class GuardedClass
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-20T20:14:36-0400>
+   * @date <2003-07-20T20:17:34-0400>
    * @version 2.3.0
    *
    * A simple wrapper template that uses Guard's to provide 
@@ -85,7 +85,11 @@ namespace ZThread {
       public:
       
       GuardedClass(T* ptr) : _ptr(ptr) {}
-      
+      ~GuardedClass() {
+        if(_ptr)
+          delete _ptr;
+      }
+
       Proxy operator->() {
         Proxy p(_lock, _ptr);
         return p;
