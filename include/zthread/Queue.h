@@ -1,8 +1,8 @@
 /*
- *  ZThreads, a platform-independant, multithreading and 
- *  synchroniation library
+ *  ZThreads, a platform-independent, multi-threading and 
+ *  synchronization library
  *
- *  Copyright (C) 2000-2002, Eric Crahen, See LGPL.TXT for details
+ *  Copyright (C) 2000-2003, Eric Crahen, See LGPL.TXT for details
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -30,15 +30,11 @@ namespace ZThread {
   /**
    * @class Queue
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-07T22:05:22-0400>
+   * @date <2003-07-16T11:32:42-0400>
    * @version 2.3.0
    *
-   * A Queue defines an interface of a synchronization point for a collection objects. 
-   * It also defines the semantics for how the ownership of these objects is transfered
-   * between the Queue and the objects that interact with it.
-   *
-   * A Queue coordinates the gathering and distribution of items for any set of 
-   * threads. 
+   * A Queue defines an interface for a value-oriented collection objects (similar to
+   * STL collections). 
    */
   template <typename T>
     class Queue : public Cancelable, private NonCopyable {
@@ -48,163 +44,105 @@ namespace ZThread {
     virtual ~Queue() { }
 
     /**
-     * Add an object to this Queue, tranfering the ownership of that
-     * object to the Queue. As the new owner, the Queue becomes responsible 
-     * for deleting the add()ed object. 
+     * Add an object to this Queue.
      *
-     * This method may or may not block the caller for an indefinite amount
-     * of time. Those details are defined by specializations of this class.
-     *
-     * @param item - object to attempt to add to this Queue
+     * @param item value to be added to the Queue
      * 
-     * @exception Cancellation_Exception thrown if an item is added to a cancel()ed
-     * Queue
-     * @exception Interrupted_Exception thrown if the the method is invoked from the 
-     * context of a thread that has been interrupt()ed.
-     * @exception Synchronization_Exception thrown if there is some other error in
-     * adding the item to the Queue
+     * @exception Cancellation_Exception thrown if this Queue has been canceled.
+     *
+     * @pre  The Queue should not have been canceled prior to the invocation of this function.
+     * @post If no exception is thrown, a copy of <i>item</i> will have been added to the Queue.
      */
-    virtual void add(T item) = 0;
+    virtual void add(const T& item) = 0;
 
     /**
-     * Add an object to this Queue, tranfering the ownership of that
-     * object to the Queue. As the new owner, the Queue becomes responsible 
-     * for deleting the add()ed object. 
+     * Add an object to this Queue.
      *
-     * This method may or may not block the caller for a definite amount
-     * of time. Those details are defined by specializations of this class;
-     * however, this method includes a timeout value that can be used to 
-     * limit the maximum amount of time that a specialization <i>could</i> block. 
+     * @param item value to be added to the Queue
+     * @param timeout maximum amount of time (milliseconds) this method may block
+     *        the calling thread.
      *
-     * @param item - object to attempt to add to this Queue
-     * @param timeout - maximum amount of time (milliseconds) this method could block
-     * 
-     * @return true if the item was add()ed before the given timeout expired. Otherwise
-     * false
+     * @return 
+     *   - <em>true</em> if a copy of <i>item</i> can be added before <i>timeout</i> 
+     *     milliseconds elapse.
+     *   - <em>false</em> otherwise.
      *
-     * @exception Cancellation_Exception thrown if an item is added to a cancel()ed
-     * Queue
-     * @exception Interrupted_Exception thrown if the the method is invoked from the 
-     * context of a thread that has been interrupt()ed.
-     * @exception Synchronization_Exception thrown if there is some other error in
-     * adding the item to the Queue
+     * @exception Cancellation_Exception thrown if this Queue has been canceled.
+     *
+     * @pre  The Queue should not have been canceled prior to the invocation of this function.
+     * @post If this function returns true a copy of <i>item</i> will have been added to the Queue.
      */
-    virtual bool add(T item, unsigned long timeout) = 0;
+    virtual bool add(const T& item, unsigned long timeout) = 0;
 
     /**
-     * Get an object from this Queue, transfering the ownership of that
-     * object to the caller. As the new owner, the caller becomes responsible 
-     * for deleting the object. 
+     * Retrieve and remove a value from this Queue.
      *
-     * This method may or may not block the caller for an indefinite amount
-     * of time. Those details are defined by specializations of this class.
-     *
-     * @return T next available object
+     * @return <em>T</em> next available value
      * 
-     * @exception Cancellation_Exception thrown if the Queue has been cancel()ed and
-     * no more items are present.
-     * @exception Interrupted_Exception thrown if the the method is invoked from the 
-     * context of a thread that has been interrupt()ed.
-     * @exception Synchronization_Exception thrown if there is some other error in
-     * adding the item to the Queue
+     * @exception Cancellation_Exception thrown if this Queue has been canceled.
+     *
+     * @pre  The Queue should not have been canceled prior to the invocation of this function.
+     * @post The value returned will have been removed from the Queue.
      */
     virtual T next() = 0;
 
     /**
-     * Get an object from this Queue, transfering the ownership of that
-     * object to the caller. As the new owner, the caller becomes responsible 
-     * for deleting the object. 
+     * Retrieve and remove a value from this Queue.
      *
-     * This method may or may not block the caller for a definite amount
-     * of time. Those details are defined by specializations of this class;
-     * however, this method includes a timeout value that can be used to 
-     * limit the maximum amount of time that a specialization <i>could</i> block. 
+     * @param timeout maximum amount of time (milliseconds) this method may block
+     *        the calling thread.
      *
-     * @param timeout - maximum amount of time (millseconds) this method could block
-     * @return T next available object
+     * @return <em>T</em> next available value
      * 
-     * @exception Cancellation_Exception thrown if the Queue has been cancel()ed and
-     * no more items are present.
-     * @exception Interrupted_Exception thrown if the the method is invoked from the 
-     * context of a thread that has been interrupt()ed.
-     * @exception Timeout_Exception thrown if the given amount
-     * of time has expired before an item becomes available
-     * @exception Synchronization_Exception thrown if there is some other error in
-     * adding the item to the Queue
+     * @exception Cancellation_Exception thrown if this Queue has been canceled.
+     * @exception Timeout_Exception thrown if the timeout expires before a value
+     *            can be retrieved.
+     *
+     * @pre  The Queue should not have been canceled prior to the invocation of this function.
+     * @post The value returned will have been removed from the Queue.
      */
     virtual T next(unsigned long timeout) = 0;
 
     /**
-     * Canceling a Queue disables it, disallowing further add()itions. Items already
+     * Canceling a Queue disables it, disallowing further additions. Values already
      * present in the Queue can still be retrieved and are still available through
      * the next() methods.
      *
-     * cancel()ing a Queue more than once has no effect.
+     * Canceling a Queue more than once has no effect.
      * 
      * @post The next() methods will continue to return objects until 
-     * the Queue has been emptied. At that point, further calls to the next() methods
-     * will throw Cancellation_Exceptions
-     *
-     * @post The add() methods will throw Cancellation_Exceptions from this point on.
-     *
-     * @exception Interrupted_Exception should <i>not</i> be thrown. 
-     * @exception Synchronization_Exception thrown if there is some error in 
-     * cancel()ing the Queue.
+     *       the Queue has been emptied. 
+     * @post Once emptied, the next() methods will throw a Cancellation_Exception.
+     * @post The add() methods will throw a Cancellation_Exceptions from this point on.
      */
     virtual void cancel() = 0;
 
     /**
-     * Count the items present in this Queue. 
+     * Count the values present in this Queue. 
      *
-     * This method may or may not block the caller for an indefinite amount
-     * of time. Those details are defined by specializations of this class.
-     *
-     * @return size_t number of elements available in the Queue. These are
-     * retrievable through the next() methods.
-     * 
-     * @exception Interrupted_Exception thrown if the the method is invoked from the 
-     * context of a thread that has been interrupt()ed.
-     * @exception Synchronization_Exception thrown if there is some error in
-     * counting the items.
+     * @return <em>size_t</em> number of elements available in the Queue. 
      */
     virtual size_t size() = 0;
 
     /**
-     * Count the items present in this Queue. 
+     * Count the values present in this Queue. 
      *
-     * This method may or may not block the caller for an indefinite amount
-     * of time. Those details are defined by specializations of this class.
+     * @param timeout maximum amount of time (milliseconds) this method may block
+     *        the calling thread.
      *
-     * This method may or may not block the caller for a definite amount
-     * of time. Those details are defined by specializations of this class;
-     * however, this method includes a timeout value that can be used to 
-     * limit the maximum amount of time that a specialization <i>could</i> block. 
+     * @return <em>size_t</em> number of elements available in the Queue. 
      *
-     * @param timeout - maximum amount of time (millseconds) this method could block
-
-     * @return size_t number of elements available in the Queue. These are
-     * retrievable through the next() methods.
-     * 
-     * @exception Interrupted_Exception thrown if the the method is invoked from the 
-     * context of a thread that has been interrupt()ed.
-     * @exception Timeout_Exception thrown if the given amount
-     * of time has expired before an item becomes available
-     * @exception Synchronization_Exception thrown if there is some error in
-     * counting the items.
+     * @exception Timeout_Exception thrown if <i>timeout</i> milliseconds
+     *            expire before a value becomes available
      */
     virtual size_t size(unsigned long timeout) = 0;
 
     /**
-     * Test this Queue to see if it is empty by testing the size of the 
-     * Queue.
+     * Test whether any values are available in this Queue.
      *
-     * @return boolean  true if empty, otherwise false
-     *
-     * @exception Cancellation_Exception should not be thrown. A cancel()ed
-     * Queue that contains no more elements should report that it is 
-     * empty.
-     *
-     * @see Queue::size()
+     * @return 
+     *  - <em>true</em> if there are no values available.
+     *  - <em>false</em> if there <i>are</i> values available.
      */
     virtual bool empty() {
 
@@ -219,18 +157,17 @@ namespace ZThread {
     }
 
     /**
-     * Test this Queue to see if it is empty by testing the size of the 
-     * Queue.
+     * Test whether any values are available in this Queue.
      *
-     * @param timeout - maximum amount of time (millseconds) this method could block
+     * @param timeout maximum amount of time (milliseconds) this method may block
+     *        the calling thread.
      *
-     * @return boolean  true if empty, otherwise false
+     * @return 
+     *  - <em>true</em> if there are no values available.
+     *  - <em>false</em> if there <i>are</i> values available.
      *
-     * @exception Cancellation_Exception should not be thrown. A cancel()ed
-     * Queue that contains no more elements should report that it is 
-     * empty.
-     *
-     * @see Queue::size(unsigned long)
+     * @exception Timeout_Exception thrown if <i>timeout</i> milliseconds
+     *            expire before a value becomes available
      */
     virtual bool empty(unsigned long timeout) {
 

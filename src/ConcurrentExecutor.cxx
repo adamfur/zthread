@@ -2,7 +2,7 @@
  *  ZThreads, a platform-independent, multi-threading and 
  *  synchronization library
  *
- *  Copyright (C) 2000-2003 Eric Crahen, See LGPL.TXT for details
+ *  Copyright (C) 2000-2003, Eric Crahen, See LGPL.TXT for details
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -19,43 +19,35 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-
-#include "zthread/RecursiveMutex.h"
-#include "RecursiveMutexImpl.h"
+#include "zthread/ConcurrentExecutor.h"
 
 namespace ZThread {
 
-  RecursiveMutex::RecursiveMutex() {
-  
-    _impl = new RecursiveMutexImpl();
-  
+  ConcurrentExecutor::ConcurrentExecutor() 
+    : _executor(1) {}
+
+  void ConcurrentExecutor::interrupt() {
+    _executor.interrupt();
   }
 
-  RecursiveMutex::~RecursiveMutex() {
-
-    if(_impl != (RecursiveMutexImpl*)0 ) 
-      delete _impl;
-
+  void ConcurrentExecutor::execute(const Task& task) {
+    _executor.execute(task);
+  }
+    
+  void ConcurrentExecutor::cancel() {
+    _executor.cancel();
+  }
+    
+  bool ConcurrentExecutor::isCanceled() {
+    return _executor.isCanceled(); 
+  }
+    
+  void ConcurrentExecutor::wait() {
+    _executor.wait();
+  }
+    
+  bool ConcurrentExecutor::wait(unsigned long timeout) {
+    return _executor.wait(timeout);      
   }
 
-
-  void RecursiveMutex::acquire() {
-
-    _impl->acquire(); 
-
-  }
-
-
-  bool RecursiveMutex::tryAcquire(unsigned long ms) {
-
-    return _impl->tryAcquire(ms); 
-
-  }
-
-  void RecursiveMutex::release() {
-
-    _impl->release(); 
-
-  }
-
-} // namespace ZThread
+}

@@ -1,8 +1,8 @@
 /*
- *  ZThreads, a platform-independant, multithreading and 
- *  synchroniation library
+ *  ZThreads, a platform-independent, multi-threading and 
+ *  synchronization library
  *
- *  Copyright (C) 2001, 2002 Eric Crahen, See LGPL.TXT for details
+ *  Copyright (C) 2000-2003 Eric Crahen, See LGPL.TXT for details
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -17,9 +17,6 @@
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
- *
- *  SUNY @ Buffalo, hereby disclaims all copyright interest in the
- *  ZThreads library written by Eric Crahen
  */
 
 #ifndef __ZTINTRUSIVEPTR_H__
@@ -33,7 +30,7 @@ namespace ZThread {
 /**
  * @class IntrusivePtr
  * @author Eric Crahen <crahen@cse.buffalo.edu>
- * @date <2003-07-07T13:17:14-0400>
+ * @date <2003-07-16T17:54:23-0400>
  * @version 2.2.0
  *
  * This template creates an intrusively reference counted object
@@ -58,7 +55,7 @@ public:
   IntrusivePtr(size_t InitialCount=1) : _count(InitialCount) { }
   
   /**
-   * Destry an IntrusivePtr
+   * Destroy an IntrusivePtr
    */
   virtual ~IntrusivePtr() {}
 

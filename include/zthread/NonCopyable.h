@@ -1,8 +1,8 @@
 /*
- *  ZThreads, a platform-independant, multithreading and
- *  synchroniation library
+ *  ZThreads, a platform-independent, multi-threading and
+ *  synchronization library
  *
- *  Copyright (C) 2001, 2002 Eric Crahen, See LGPL.TXT for details
+ *  Copyright (C) 2000-2003 Eric Crahen, See LGPL.TXT for details
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,7 @@ namespace ZThread {
   /**
    * @class NonCopyable
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-07T21:56:49-0400>
+   * @date <2003-07-16T19:36:00-0400>
    * @version 2.2.11
    *
    * Some objects kind of objects should not be copied. This is particularly true

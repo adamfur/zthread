@@ -1,8 +1,8 @@
 /*
- *  ZThreads, a platform-independant, multithreading and 
- *  synchroniation library
+ *  ZThreads, a platform-independent, multi-threading and 
+ *  synchronization library
  *
- *  Copyright (C) 2000-2002, Eric Crahen, See LGPL.TXT for details
+ *  Copyright (C) 2000-2003, Eric Crahen, See LGPL.TXT for details
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -17,9 +17,6 @@
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
- *
- *  SUNY @ Buffalo, hereby disclaims all copyright interest in the
- *  ZThreads library written by Eric Crahen
  */
 
 #ifndef __ZTSINGLETON_H__
@@ -47,7 +44,7 @@ namespace ZThread {
 /**
  * @class LocalStaticInstantiation
  * @author Eric Crahen <crahen@cse.buffalo.edu>
- * @date <2003-07-07T11:40:57-0400>
+ * @date <2003-07-16T17:57:45-0400>
  * @version 2.2.0 
  *
  * The LocalStaticInstantiation policy allows the creation 
@@ -92,7 +89,7 @@ class StaticInstantiationHelper {
 /**
  * @class StaticInstantiation
  * @author Eric Crahen <crahen@cse.buffalo.edu>
- * @date <2003-07-07T11:40:57-0400>
+ * @date <2003-07-16T17:57:45-0400>
  * @version 2.2.0 
  *
  * The StaticInstantiation policy allows the creation 
@@ -151,7 +148,7 @@ Destroyer<T>::~Destroyer() {
 /**
  * @class LazyInstantiation
  * @author Eric Crahen <crahen@cse.buffalo.edu>
- * @date <2003-07-07T11:40:57-0400>
+ * @date <2003-07-16T17:57:45-0400>
  * @version 2.2.0
  *
  * The LazyInstantiation policy allows the creation 
@@ -185,7 +182,7 @@ protected:
 /**
  * @class Singleton
  * @author Eric Crahen <crahen@cse.buffalo.edu>
- * @date <2003-07-07T11:40:57-0400>
+ * @date <2003-07-16T17:57:45-0400>
  * @version 2.2.0 
  *
  * Based on the work of John Vlissidles in his book 'Pattern Hatching'
@@ -193,7 +190,7 @@ protected:
  * templates described by Andrei Alexandrescu.
  *
  * This is a thread safe wrapper for creating Singleton classes. The 
- * syncronization method and instantiation methods can be changed
+ * synchronization method and instantiation methods can be changed
  * easily by specifying different policy implementations as the 
  * templates parameters.
  *

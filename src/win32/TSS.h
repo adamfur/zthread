@@ -1,8 +1,8 @@
 /*
- *  ZThreads, a platform-independant, multithreading and 
- *  synchroniation library
+ *  ZThreads, a platform-independent, multi-threading and 
+ *  synchronization library
  *
- *  Copyright (C) 2001, 2002 Eric Crahen, See LGPL.TXT for details
+ *  Copyright (C) 2000-2003 Eric Crahen, See LGPL.TXT for details
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -17,9 +17,6 @@
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
- *
- *  SUNY @ Buffalo, hereby disclaims all copyright interest in the
- *  ZThreads library written by Eric Crahen
  */
 
 #ifndef __ZTTSS_H__
@@ -31,8 +28,8 @@ namespace ZThread {
 
 /**
  * @class TSS
- * @author Eric Crahen <zthread@code-foo.com>
- * @date <2002-05-26T11:47:55-0400>
+ * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @date <2003-07-16T23:33:47-0400>
  * @version 2.1.0
  *
  * An abstraction for dealing with WIN32 thread specific storage (tss). 

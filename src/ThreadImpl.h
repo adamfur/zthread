@@ -1,8 +1,8 @@
 /*
- *  ZThreads, a platform-independant, multithreading and 
- *  synchroniation library
+ *  ZThreads, a platform-independent, multi-threading and 
+ *  synchronization library
  *
- *  Copyright (C) 2001, 2002 Eric Crahen, See LGPL.TXT for details
+ *  Copyright (C) 2000-2003 Eric Crahen, See LGPL.TXT for details
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -40,7 +40,7 @@ namespace ZThread {
 /**
  * @class ThreadImpl
  * @author Eric Crahen <crahen@cse.buffalo.edu>
- * @date <2003-07-07T21:51:17-0400>
+ * @date <2003-07-16T20:10:03-0400>
  * @version 2.3.0
  */
 class ThreadImpl : public IntrusivePtr<ThreadImpl, FastLock>, public ThreadOps {

@@ -1,8 +1,8 @@
 /*
- *  ZThreads, a platform-independant, multithreading and 
- *  synchroniation library
+ *  ZThreads, a platform-independent, multi-threading and 
+ *  synchronization library
  *
- *  Copyright (C) 2000-2002, Eric Crahen, See LGPL.TXT for details
+ *  Copyright (C) 2000-2003, Eric Crahen, See LGPL.TXT for details
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -26,103 +26,65 @@
 
 namespace ZThread {
 
-/**
- * @class ThreadLocal
- *
- * @author Eric Crahen <zthread@code-foo.com>
- * @date <2002-05-30T17:50:36-0400>
- * @version 2.2.0
- *
- * Provides a method to access the local storage of each thread. No matter
- * what thread access this object, it will always store values unique to
- * each thread. This is done using the local storage allocated by the OS
- * for each thread. It doesn't require any locking and is very fast
- *
- * The first time a ThreadLocal veriable is accessed by a thread the initialValue()
- * method will be invoked. This allows subclasses to perfrom any special 
- * actions they might need to when a new thread uses one of these variables.
- *
- * The destroyValue() method is invoked when a thread that has 
- * used a ThreadLocal is about to exit. 
- *
- * The recommended usage of this object would be something like in the
- * example shown below
- *
- * @code
- *
- * class MyClass {
- * protected:
- *
- * static ThreadLocal<int> _threadKey;
- *
- * public:
- * 
- * int getValue() const {
- *   return _threadKey.get();
- * }
- * 
- * int setValue(int n) const {
- *   return _threadKey.set(n);
- * }
- *
- * };
- *
- * @endcode
- *
- * The ThreadLocal object itself acts as the key, instead of some arbitrary
- * integer that needed to be defined by the programmer before. This is a
- * much more elegant solution.
- *
- * @see AbstractThreadLocal
- */
-template <class T>
-class ThreadLocal : protected AbstractThreadLocal {
- public:
-
-  //! Destroy this ThreadLocal.
-  virtual ~ThreadLocal() throw() { }
-
   /**
-   * Get the value associated with the current thread and this object via fetch().
-   * If no association exists, then initialValue() is invoked.
+   * @class ThreadLocal
    *
-   * @return T associated value
+   * @author Eric Crahen <crahen@cse.buffalo.edu>
+   * @date <2003-07-16T19:26:38-0400>
+   * @version 2.2.0
    *
-   * @exception Synchronization_Exception - thrown if there is an error
-   * allocating native thread local storage
+   * Provides a method to access the local storage of each thread. No matter
+   * what thread access this object, it will always store values unique to
+   * each thread. 
+   *
+   * The first time a ThreadLocal variable is accessed by a thread the initialValue()
+   * method will be invoked. This allows subclasses to perform any special 
+   * actions they might need to when a new thread uses one of these variables.
+   *
+   * The destroyValue() method is invoked when a thread that has 
+   * used a ThreadLocal is about to exit. 
+   *
    */
-  inline T get() const throw() {
-    return reinterpret_cast<T>( AbstractThreadLocal::get() );
-  }
+  template <class T>
+    class ThreadLocal : protected AbstractThreadLocal {
+    public:
+
+    /**
+     * Get the value associated with the current thread and this object via fetch().
+     * If no association exists, then initialValue() is invoked.
+     *
+     * @return <em>T</em> value associated with the current thread and this object.
+     */
+    inline T get() const throw() {
+      return reinterpret_cast<T>( AbstractThreadLocal::get() );
+    }
   
-  /**
-   * Set the value associated with the current thread and this object. This value 
-   * can only be retrieved from the current thread.
-   *
-   * @param T new associated value
-   * @return T old associated value, if no association exists, then initialValue() 
-   * is invoked.
-   *
-   * @exception Synchronization_Exception - thrown if there is an error
-   * allocating native thread local storage
-   */
-  inline T set(T val) const throw() {
-    return reinterpret_cast<T>( AbstractThreadLocal::set((void*)val) );
-  }
+    /**
+     * Set the value associated with the current thread and this object. The value 
+     * can only be retrieved from the current thread.
+     *
+     * @param newValue to associate with the current thread and this object.
+     *
+     * @return <em>T</em> value previously associated with the current thread and this object.
+     */
+    inline T set(T val) const {
+      return reinterpret_cast<T>( AbstractThreadLocal::set((void*)val) );
+    }
 
-  protected:
+    protected:
 
-  /**
-   * Invoked by the framework the first time a get() or set() is invoked on a 
-   * ThreadLocal variable from a particular thread. 
-   *
-   * @return void* - value that will be set for the executing thread
-   */
-  inline virtual void* initialValue() const throw() {   
-    return 0;
-  }
+    /** 
+     * Invoked by the framework the first time get() is invoked by the
+     * current thread, if no child value has been propagated. 
+     *
+     * @return <em>void*</em> When invoked by the framework, the value returned is 
+     *                        associated with the current thread and this object. 
+     */
+    inline virtual void* initialValue() const {   
+      return 0;
+    }
 
-};
+  };
 
 
 } // namespace ZThread

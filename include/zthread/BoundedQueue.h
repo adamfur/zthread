@@ -1,8 +1,8 @@
 /*
- *  ZThreads, a platform-independant, multithreading and 
- *  synchroniation library
+ *  ZThreads, a platform-independent, multi-threading and 
+ *  synchronization library
  *
- *  Copyright (C) 2000-2002, Eric Crahen, See LGPL.TXT for details
+ *  Copyright (C) 2000-2003, Eric Crahen, See LGPL.TXT for details
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -34,20 +34,25 @@ namespace ZThread {
    * @class BoundedQueue
    *
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-08T09:37:33-0400>
+   * @date <2003-07-16T13:54:04-0400>
    * @version 2.3.0
    *
-   * A BoundedQueues is a Queue implementation that provides  serialized access to the 
-   * items added to it. It addition, a BoundedQueues will block threads calling 
-   * empty() methods until the Queue becomes empty. Similarly, threads calling the 
-   * next() methods will be blocked until items arrive. Finally, threads calling the
-   * the add() methods will be blocked if the Queue is at capacity.
+   * A BoundedQueue provides serialized access to a set of values. It differs from other
+   * Queues by adding a maximum capacity, giving it the following properties:
+   *
+   * - Threads calling the empty() methods will be blocked until the BoundedQueue becomes empty. 
+   * - Threads calling the next() methods will be blocked until the BoundedQueue has a value to
+   *   return. 
+   * - Threads calling the add() methods will be blocked until the number of values in the 
+   *   Queue drops below the maximum capacity.
+   *
+   * @see Queue
    */
   template <class T, class LockType, typename StorageType=std::deque<T> >
-    class BoundedQueue : public Queue<T> {
+    class BoundedQueue : public Queue<T>, public Lockable {
 
       //! Maximum capacity for the Queue
-      unsigned int _capacity;
+      size_t _capacity;
 
       //! Serialize access
       LockType _lock;
@@ -70,47 +75,49 @@ namespace ZThread {
       public:
 
       /**
-       * Create a new Queue with the given capacity. This 
-       * capacity can not be altered once the Queue is created.
+       * Create a BoundedQueue with the given capacity. 
        * 
-       * @param int capacity
+       * @param capacity maximum number of values to allow in the Queue at
+       *        at any time
        */
-      BoundedQueue(unsigned int capacity)
+      BoundedQueue(size_t capacity)
         : _notFull(_lock), _notEmpty(_lock), _isEmpty(_lock), 
           _capacity(capacity), _canceled(false) {}
   
-      //! Destroy this Queueand any remaining items 
+      //! Destroy this Queue
       virtual ~BoundedQueue() { }
     
       /**
-       * Get the capacity of this Queue. When the Queue is at capacity
-       * the add() methods will block.
+       * Get the maximum capacity of this Queue. 
        *
-       * @return unsigned int capacity
+       * @return <i>size_t</i> maximum capacity
        */
-      unsigned int capacity() { 
+      size_t capacity() { 
         return _capacity; 
       }
 
       /**
-       * Add an object to this Queue, tranfering the ownership of that
-       * object to the Queue. As the new owner, the Queue becomes responsible 
-       * for deleting the add()ed object. 
+       * Add a value to this Queue. 
        *
-       * This method may block the caller for an indefinite amount
-       * of time if the Queue is at capacity.
+       * If the number of values in the queue matches the value returned by <i>capacity</i>() 
+       * then the calling thread will be blocked until at least one value is removed from 
+       * the Queue.
        *
-       * @param item - object to attempt to add to this Queue
+       * @param item value to be added to the Queue
        * 
-       * @see Queue::add(T)
+       * @exception Cancellation_Exception thrown if this Queue has been canceled.
+       * @exception Interrupted_Exception thrown if the thread was interrupted while waiting
+       *            to add a value
        *
-       * @post if the Queue was empty, threads blocked by a next() method will 
-       * be awakend if no exception is thrown
+       * @pre  The Queue should not have been canceled prior to the invocation of this function.
+       * @post If no exception is thrown, a copy of <i>item</i> will have been added to the Queue.
+       *
+       * @see Queue::add(const T& item)
        */
-      virtual void add(T item) {
-
+      virtual void add(const T& item) {
+        
         Guard<LockType> g(_lock);
-      
+        
         // Wait for the capacity of the Queue to drop 
         while ((_queue.size() == _capacity) && !_canceled)
           _notFull.wait();
@@ -125,25 +132,31 @@ namespace ZThread {
       }
     
       /**
-       * Add an object to this Queue, tranfering the ownership of that
-       * object to the Queue. As the new owner, the Queue becomes responsible 
-       * for deleting the add()ed object. 
+       * Add a value to this Queue. 
        *
-       * This method may block the caller for an indefinite amount
-       * of time if the Queue is at capacity.
+       * If the number of values in the queue matches the value returned by <i>capacity</i>() 
+       * then the calling thread will be blocked until at least one value is removed from 
+       * the Queue.
        *
-       * @param item - object to attempt to add to this Queue
-       * @param timeout - maximum amount of time (milliseconds) this method could block
-       * 
-       * @return true if the item was add()ed before the given timeout expired. Otherwise
-       * false
+       * @param item value to be added to the Queue
+       * @param timeout maximum amount of time (milliseconds) this method may block
+       *        the calling thread.
        *
-       * @see Queue::add(T, unsigned long)
+       * @return 
+       *   - <em>true</em> if a copy of <i>item</i> can be added before <i>timeout</i> 
+       *     milliseconds elapse.
+       *   - <em>false</em> otherwise.
        *
-       * @post if the Queue was empty, threads blocked by a next() method will 
-       * be awakend if no exception is thrown
+       * @exception Cancellation_Exception thrown if this Queue has been canceled.
+       * @exception Interrupted_Exception thrown if the thread was interrupted while waiting
+       *            to add a value
+       *
+       * @pre  The Queue should not have been canceled prior to the invocation of this function.
+       * @post If no exception is thrown, a copy of <i>item</i> will have been added to the Queue.
+       *
+       * @see Queue::add(const T& item, unsigned long timeout)
        */
-      virtual bool add(T item, unsigned long timeout) {
+      virtual bool add(const T& item, unsigned long timeout) {
     
         try {
 
@@ -166,22 +179,20 @@ namespace ZThread {
 
       }
 
-
       /**
-       * Get an object from this Queue. 
+       * Retrieve and remove a value from this Queue.
        *
-       * This method will block the calling thread until an item
-       * arrives in the Queue or until an exception is thrown.
+       * If invoked when there are no values present to return then the calling thread 
+       * will be blocked until a value arrives in the Queue.
        *
-       * @return T next available object
+       * @return <em>T</em> next available value
        * 
-       * @see Queue::next()
+       * @exception Cancellation_Exception thrown if this Queue has been canceled.
+       * @exception Interrupted_Exception thrown if the thread was interrupted while waiting
+       *            to retrieve a value
        *
-       * @exception Cancellation_Exception thrown if there are no items available 
-       * in the Queue and the Queue has become cancel()ed
-       *
-       * @post if the Queue becomes empty as a result of this method, threads 
-       * blocked by an empty() or size() method will be awakend.
+       * @pre  The Queue should not have been canceled prior to the invocation of this function.
+       * @post The value returned will have been removed from the Queue.
        */
       virtual T next() {
     
@@ -206,21 +217,22 @@ namespace ZThread {
       }
 
       /**
-       * Get an object from this Queue. 
+       * Retrieve and remove a value from this Queue.
        *
-       * This method will block the calling thread until an item
-       * arrives in the Queue or until an exception is thrown.
+       * If invoked when there are no values present to return then the calling thread 
+       * will be blocked until a value arrives in the Queue.
        *
-       * @param timeout - maximum amount of time (milliseconds) this method could block
-       * @return T next available object
+       * @param timeout maximum amount of time (milliseconds) this method may block
+       *        the calling thread.
+       *
+       * @return <em>T</em> next available value
        * 
-       * @see Queue::next(unsigned long)
+       * @exception Cancellation_Exception thrown if this Queue has been canceled.
+       * @exception Timeout_Exception thrown if the timeout expires before a value
+       *            can be retrieved.
        *
-       * @exception Cancellation_Exception thrown if there are no items available 
-       * in the Queue and the Queue has become cancel()ed
-       *
-       * @post if the Queue becomes empty as a result of this method, threads 
-       * blocked by an empty() method will be awakend.
+       * @pre  The Queue should not have been canceled prior to the invocation of this function.
+       * @post The value returned will have been removed from the Queue.
        */
       virtual T next(unsigned long timeout) {
       
@@ -249,14 +261,11 @@ namespace ZThread {
 
       /**
        * Cancel this queue. 
-       *
-       * This method will block the calling thread until exclusive access to 
-       * the Queue can be obtained or until an exception is thrown.
-       *
+       * 
+       * @post Any threads blocked by an add() function will throw a Cancellation_Exception.
+       * @post Any threads blocked by a next() function will throw a Cancellation_Exception.
+       * 
        * @see Queue::cancel()
-       *
-       * @post If threads are blocked on a next(), empty() or size() method, 
-       * they will awakend
        */
       virtual void cancel() {
     
@@ -268,13 +277,6 @@ namespace ZThread {
       }
 
       /**
-       * Determine if this Queue has been cancel()ed.
-       *
-       * This method will block the calling thread until exclusive access to 
-       * the Queue can be obtained or until an exception is thrown.
-       *
-       * @return bool true if cancel() was called prior to this method, otherwise false.
-       * 
        * @see Queue::isCanceled()
        */
       virtual bool isCanceled() {
@@ -290,13 +292,6 @@ namespace ZThread {
       }
 
       /**
-       * Count the items present in this Queue. 
-       *
-       * This method will not block the calling thread.
-       *
-       * @return size_t number of elements available in the Queue. These are
-       * retrievable through the next() methods.
-       *
        * @see Queue::size()
        */
       virtual size_t size() {
@@ -307,16 +302,7 @@ namespace ZThread {
       }
 
       /**
-       * Count the items present in this Queue. 
-       *
-       * This method will not block the calling thread.
-       *
-       * @param timeout - maximum amount of time (millseconds) this method could block
-       *
-       * @return size_t number of elements available in the Queue. These are
-       * retrievable through the next() methods.
-       *
-       * @see Queue::size(unsigned long)
+       * @see Queue::size(unsigned long timeout)
        */
       virtual size_t size(unsigned long timeout) {
 
@@ -326,20 +312,14 @@ namespace ZThread {
       }
 
       /**
-       * Test this Queue to see if it is empty. This will block the calling
-       * thread <i>until</i> the Queue becomes empty.
-       * 
-       * @return boolean  true if empty, otherwise false
+       * Test whether any values are available in this Queue.
        *
-       * @exception Cancellation_Exception should not be thrown. A cancel()ed
-       * Queue that contains no more elements should report that it is 
-       * empty.
-       * @exception Interrupted_Exception thrown if the the method is invoked from the 
-       * context of a thread that has been interrupt()ed.
-       * @exception Timeout_Exception thrown if the given amount
-       * of time has expired before an item becomes available
-       * @exception Synchronization_Exception thrown if there is some error in
-       * counting the items.
+       * The calling thread is blocked until there are no values present 
+       * in the Queue.
+       * 
+       * @return 
+       *  - <em>true</em> if there are no values available.
+       *  - <em>false</em> if there <i>are</i> values available.
        *
        * @see Queue::empty()
        */
@@ -355,25 +335,24 @@ namespace ZThread {
 
       }
 
+
       /**
-       * Test this Queue to see if it is empty. This will block the calling
-       * thread <i>until</i> the Queue becomes empty.
+       * Test whether any values are available in this Queue.
+       *
+       * The calling thread is blocked until there are no values present 
+       * in the Queue.
        * 
-       * @param timeout - maximum amount of time (millseconds) this method could block
+       * @param timeout maximum amount of time (milliseconds) this method may block
+       *        the calling thread.
        *
-       * @return boolean  true if empty, otherwise false
+       * @return 
+       *  - <em>true</em> if there are no values available.
+       *  - <em>false</em> if there <i>are</i> values available.
        *
-       * @exception Cancellation_Exception should not be thrown. A cancel()ed
-       * Queue that contains no more elements should report that it is 
-       * empty.
-       * @exception Interrupted_Exception thrown if the the method is invoked from the 
-       * context of a thread that has been interrupt()ed.
-       * @exception Timeout_Exception thrown if the given amount
-       * of time has expired before an item becomes available
-       * @exception Synchronization_Exception thrown if there is some error in
-       * counting the items.
+       * @exception Timeout_Exception thrown if <i>timeout</i> milliseconds
+       *            expire before a value becomes available
        *
-       * @see Queue::empty(unsigned long)
+       * @see Queue::empty()
        */
       virtual bool empty(unsigned long timeout) {
 
@@ -384,6 +363,20 @@ namespace ZThread {
     
         return true;
 
+      }
+
+      public:
+
+      virtual void acquire() {
+        _lock.acquire();
+      }
+
+      virtual bool tryAcquire(unsigned long timeout) {
+        return _lock.tryAcquire(timeout);
+      }
+
+      virtual void release() {
+        _lock.release();
       }
 
     }; /* BoundedQueue */

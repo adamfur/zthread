@@ -1,8 +1,8 @@
 /*
- *  ZThreads, a platform-independant, multithreading and 
- *  synchroniation library
+ *  ZThreads, a platform-independent, multi-threading and 
+ *  synchronization library
  *
- *  Copyright (C) 2001, 2002 Eric Crahen, See LGPL.TXT for details
+ *  Copyright (C) 2000-2003 Eric Crahen, See LGPL.TXT for details
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -17,9 +17,6 @@
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
- *
- *  SUNY @ Buffalo, hereby disclaims all copyright interest in the
- *  ZThreads library written by Eric Crahen
  */
 
 #include "zthread/AbstractThreadLocal.h"
@@ -28,52 +25,52 @@
 
 namespace ZThread {
 
-AbstractThreadLocal::AbstractThreadLocal() {}
+  AbstractThreadLocal::AbstractThreadLocal() {}
 
-AbstractThreadLocal::~AbstractThreadLocal() throw() {} 
+  AbstractThreadLocal::~AbstractThreadLocal() {} 
 
-void* AbstractThreadLocal::get() const throw() {
+  void* AbstractThreadLocal::get() const {
 
-  ThreadLocalMap& map = ThreadImpl::current()->getThreadLocalMap();
-  void* value = 0;
+    ThreadLocalMap& map = ThreadImpl::current()->getThreadLocalMap();
+    void* value = 0;
 
-  // Try to get the value directly from the map, if its not present
-  // then initialize that value.
-  if(!map.getValue(this, value)) {
+    // Try to get the value directly from the map, if its not present
+    // then initialize that value.
+    if(!map.getValue(this, value)) {
     
-    value = initialValue();
-    void* oldValue;
+      value = initialValue();
+      void* oldValue;
 
-    map.setValue(this, oldValue, value);
+      map.setValue(this, oldValue, value);
+
+    }
+
+    return value;
 
   }
 
-  return value;
+  void* AbstractThreadLocal::set(void* newValue) const {
 
-}
-
-void* AbstractThreadLocal::set(void* newValue) const throw() {
-
-  ThreadLocalMap& map = ThreadImpl::current()->getThreadLocalMap();
-  void* oldValue = 0;
+    ThreadLocalMap& map = ThreadImpl::current()->getThreadLocalMap();
+    void* oldValue = 0;
  
-  if(!map.setValue(this, oldValue, newValue))
-    oldValue = initialValue();
+    if(!map.setValue(this, oldValue, newValue))
+      oldValue = initialValue();
   
-  return oldValue;
+    return oldValue;
 
-}
+  }
 
 
-void AbstractThreadLocal::destroyValue(void*) const throw() {
-}
+  void AbstractThreadLocal::destroyValue(void*) const {
+  }
   
-bool AbstractThreadLocal::propogateValue() const throw() {
-  return false;
-}
+  bool AbstractThreadLocal::propogateValue() const {
+    return false;
+  }
 
-void* AbstractThreadLocal::childValue(void*) const throw() {
-  return (void*)0;
-}
+  void* AbstractThreadLocal::childValue(void*) const {
+    return (void*)0;
+  }
 
 } // namespace ZThread 

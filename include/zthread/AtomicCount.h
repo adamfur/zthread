@@ -1,8 +1,8 @@
 /*
- *  ZThreads, a platform-independant, multithreading and 
- *  synchroniation library
+ *  ZThreads, a platform-independent, multi-threading and 
+ *  synchronization library
  *
- *  Copyright (C) 2000-2002, Eric Crahen, See LGPL.TXT for details
+ *  Copyright (C) 2000-2003, Eric Crahen, See LGPL.TXT for details
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -32,12 +32,12 @@ namespace ZThread {
   /**
    * @class AtomicCount
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-07T21:54:11-0400> 
+   * @date <2003-07-16T09:41:55-0400> 
    * @version 2.3.0
    *
-   * This class provides an inferance to a small integer whose value can be
+   * This class provides an interface to a small integer whose value can be
    * incremented or decremented atomically. It's designed to be as simple and
-   * lightwieght as possible so that it can be used cheaply to create reference
+   * lightweight as possible so that it can be used cheaply to create reference
    * counts.
    */
   class ZTHREAD_API AtomicCount : public NonCopyable {

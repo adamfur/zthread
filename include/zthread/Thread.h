@@ -2,7 +2,7 @@
  *  ZThreads, a platform-independant, multithreading and
  *  synchroniation library
  *
- *  Copyright (C) 2000-2002, Eric Crahen, See LGPL.TXT for details
+ *  Copyright (C) 2000-2003, Eric Crahen, See LGPL.TXT for details
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -26,6 +26,7 @@
 #include "zthread/Cancelable.h"
 #include "zthread/Priority.h"
 #include "zthread/NonCopyable.h"
+#include "zthread/Runnable.h"
 
 namespace ZThread {
   
@@ -35,9 +36,13 @@ namespace ZThread {
    * @class Task
    *
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-08T09:53:26-0400>
+   * @date <2003-07-16T23:14:48-0400>
    * @version 2.3.0
    *
+   * A Task provides a CountedPtr wrapper for Runnable objects. 
+   * This wrapper enables an implicit conversion from a 
+   * <i>Runnable*</i> to a <i>Task</i> adding some syntactic sugar 
+   * to the interface.
    */
   class ZTHREAD_API Task : public CountedPtr<Runnable, AtomicCount> {
   public:
@@ -67,7 +72,7 @@ namespace ZThread {
    * @class Thread
    *
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-08T09:53:26-0400>
+   * @date <2003-07-16T23:14:48-0400>
    * @version 2.3.0
    *
    */
@@ -79,16 +84,22 @@ namespace ZThread {
   public:
 
     /**
-     * @exception Initialization_Exception - thrown if there are not
-     * enough resources to do this
+     * Create a Thread that represents the current thread.
      */
     Thread();
 
     /**
+     * Create a Thread that spawns a new thread to run the given task.
+     *
+     * @param task Task to be run by a thread managed by this executor 
+     * @param autoCancel flag to requestion automatic cancellation
+     *
+     * @post if the <i>autoCancel</i> flag was true, this thread will
+     *       automatically be canceled when main() goes out of scope.
      */
     Thread(const Task&, bool autoCancel = false);
 
-    //! Destroy a Thread
+    //! Destroy the Thread
     virtual ~Thread();
 
     //! Comparison operator
@@ -100,11 +111,14 @@ namespace ZThread {
     }
 
     /**
-     * Wait for the thread represented by this object to exit.
-     * Only one thread can wait on any other thread.
+     * Wait for the thread represented by this object to complete its task.
      *
-     * @param timeout - maximum amount of time (milliseconds) this method could block.
-     * A timeout of 0 will block indefinently.
+     * @param timeout maximum amount of time (milliseconds) this method could block.
+     *                A timeout of 0 will block indefinently.
+     *
+     * @return 
+     *   - <em>true</em> if the thread task complete before <i>timeout</i> milliseconds elapse.
+     *   - <em>false</em> othewise.
      *
      * @exception Deadlock_Exception thrown if thread attempts to join itself
      * @exception InvalidOp_Exception thrown if the thread cannot be joined
@@ -114,8 +128,9 @@ namespace ZThread {
  
     /**
      * Change the priority of this Thread. This will change the actual
-     * priority of the thread when the OS supports it. If there is no
-     * real priority support, it's simulated.
+     * priority of the thread when the OS supports it. 
+     *
+     * If there is no real priority support, it's simulated.
      *
      * @param p - new Priority
      */
@@ -129,36 +144,45 @@ namespace ZThread {
     Priority getPriority();
 
     /**
-     * Interrupts this thread.
+     * Interrupts this thread, setting the <i>interrupted</i> status of the thread.
+     * This status is cleared by one of three methods. 
      *
      * If this thread is blocked when this method is called, the thread will
      * abort that blocking operation with an Interrupted_Exception.
      *
-     * Otherwise, the <i>interrupted</i> status of the thread is set. This status
-     * is cleared by one of two methods. The first is by attempting another
-     * blocking operation; this will clear the <i>interrupted</i> status and
-     * immediately abort the operation with an Interrupted_Exception. The second
-     * is to call isInterrupted() from the context of this thread.
+     *  - The first is by attempting an operation on a synchronization object that
+     *    would normally block the calling thread; Instead of blocking the calling 
+     *    the calling thread, the function that would normally block will thrown an
+     *    Interrupted_Exception and clear the <i>interrupted</i> status of the thread.
      *
-     * A thread is never started in an interrupted state. The interrupted status
-     * of a thread will be discarded when the thread starts.
+     *  - The second is by calling Thread::interrupted().
+     * 
+     *  - The third is by calling Thread::canceled().
      *
-     * Interrupting a thread that is no longer running will have no effect other
-     * than setting the interrupt status permanently. When a thread exits, that
-     * status can no longer be cleared.
+     * Threads already blocked by an operation on a synchronization object will abort
+     * that operation with an Interrupted_Exception, clearing the threads <i>interrupted</i>
+     * status as in the first case described above.
      *
-     * @return bool true only if the Thread was interrupted successfully and it is not
-     * the current thread and it is not blocked on a synchronization object. This indicates
-     * it may be blocked by a system call, or not at all. A user can extend the Thread
-     * class to take advantage of this hint to implement i/o interruption for thier system.
+     * Interrupting a thread that is no longer running will have no effect.
+     *
+     * @return 
+     *   - <em>true</em> if the thread was interrupted while not blocked by a wait
+     *     on a synchronization object.
+     *   - <em>false</em> othewise.
      */
-    virtual bool interrupt();
+    bool interrupt();
 
     /**
      * Tests whether the current Thread has been interrupt()ed, clearing
      * its interruption status.
      *
-     * @return bool true if the Thread was interrupted, otherwise false
+     * @return 
+     *   - <em>true</em> if the Thread was interrupted.
+     *   - <em>false</em> otherwise.
+     *
+     * @post The <i>interrupted</i> status of the current thread will be cleared, 
+     *       allowing it to perform a blocking operation on a synchronization
+     *       object without throwing an exception.
      */
     static bool interrupted();
 
@@ -174,17 +198,22 @@ namespace ZThread {
      * Tests whether this thread has been canceled. If called from the context
      * of this thread, the interrupted status is cleared.
      *
-     * @return bool true if the Thread was canceled, otherwise false
-     *
-     * @post There is no serlization garuntee with this method, Its possible
-     * for a thread to be canceled immediately after this functions returns.
+     * @return 
+     *   - <em>true</em> if the Thread was canceled.
+     *   - <em>false</em> otherwise.
+     * 
+     * @see Cancelable::isCanceled()
      */
     virtual bool isCanceled();
 
     /**
-     * Set the cancelation and interruption status of this thread.
+     * Interrupt and cancel this thread in a single operation. The thread will 
+     * return <em>true</em> whenever its cancelation status is tested in the future.
      *
      * @exception InvalidOp_Exception thrown if a thread attempts to cancel itself
+     *
+     * @see Thread::interrupt()
+     * @see Cancelable::cancel()
      */
     virtual void cancel();
 
@@ -192,9 +221,10 @@ namespace ZThread {
      * Put the currently executing thread to sleep for a given amount of
      * time.
      *
-     * @param timeout - maximum amount of time (milliseconds) this method could block
+     * @param timeout maximum amount of time (milliseconds) this method could block
      *
-     * @exception Interrupted_Exception thrown if this wait was interrupt()ed
+     * @exception Interrupted_Exception thrown if the threads sleep is interrupted
+     *            before <i>timeout</i> milliseconds expire.
      */
     static void sleep(unsigned long timeout);
 

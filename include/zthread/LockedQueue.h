@@ -1,8 +1,8 @@
 /*
- *  ZThreads, a platform-independant, multithreading and 
- *  synchroniation library
+ *  ZThreads, a platform-independent, multi-threading and 
+ *  synchronization library
  *
- *  Copyright (C) 2000-2002, Eric Crahen, See LGPL.TXT for details
+ *  Copyright (C) 2000-2003, Eric Crahen, See LGPL.TXT for details
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -32,11 +32,11 @@ namespace ZThread {
   /**
    * @class LockedQueue
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-07T22:08:46-0400>
+   * @date <2003-07-16T11:42:33-0400>
    * @version 2.3.0
    *
    * A LockedQueue is the simple Queue implementation that provides 
-   * serialized access to the items added to it.
+   * serialized access to the values added to it.
    */
   template <class T, class LockType, typename StorageType=std::deque<T> >
     class LockedQueue : public Queue<T> {
@@ -59,16 +59,9 @@ namespace ZThread {
       virtual ~LockedQueue() { }
 
       /**
-       * Adds an object to this Queue.
-       *
-       * This method will block the calling thread until exclusive access to 
-       * the Queue can be obtained or until an exception is thrown.
-       *
-       * @param item - object to attempt to add to this Queue
-       * 
-       * @see Queue::add(T)
+       * @see Queue::add(const T& item)
        */
-      virtual void add(T item) {
+      virtual void add(const T& item) {
 
         Guard<LockType> g(_lock);
     
@@ -80,21 +73,9 @@ namespace ZThread {
       }
 
       /**
-       * Adds an object to this Queue.
-       *
-       * This method will block the calling thread until exclusive access to 
-       * the Queue can be obtained, until an exception is thrown or until the
-       * given amount of time expires.
-       *
-       * @param item - object to attempt to add to this Queue
-       * @param timeout - maximum amount of time (milliseconds) this method could block
-       * 
-       * @return true if the item was add()ed before the given timeout expired. Otherwise
-       * false
-       * 
-       * @see Queue::add(T, unsigned long)
+       * @see Queue::add(const T& item, unsigned long timeout)
        */
-      virtual bool add(T item, unsigned long timeout) {
+      virtual bool add(const T& item, unsigned long timeout) {
       
         try {
 
@@ -112,15 +93,6 @@ namespace ZThread {
       }
 
       /**
-       * Get an object from this Queue. 
-       *
-       * This method will block the calling thread until exclusive access to 
-       * the Queue can be obtained or until an exception is thrown.
-       *
-       * @return T next available object
-       * 
-       * @exception NoSuchElement_Exception thrown if the queue is empty.
-       *
        * @see Queue::next()
        */
       virtual T next() {
@@ -140,19 +112,9 @@ namespace ZThread {
 
       }
 
-
+      
       /**
-       * Get an object from this Queue. 
-       *
-       * This method will block the calling thread until exclusive access to 
-       * the Queue can be obtained or until an exception is thrown.
-       *
-       * @param timeout - maximum amount of time (milliseconds) this method could block
-       * @return T next available object
-       * 
-       * @exception NoSuchElement_Exception thrown if the queue is empty.
-       *
-       * @see Queue::next(unsigned long)
+       * @see Queue::next(unsigned long timeout)
        */
       virtual T next(unsigned long timeout) {
 
@@ -173,11 +135,6 @@ namespace ZThread {
 
 
       /**
-       * Cancel this queue. 
-       *
-       * This method will block the calling thread until exclusive access to 
-       * the Queue can be obtained or until an exception is thrown.
-       *
        * @see Queue::cancel()
        */
       virtual void cancel() {
@@ -189,13 +146,6 @@ namespace ZThread {
       }
 
       /**
-       * Determine if this Queue has been cancel()ed.
-       *
-       * This method will block the calling thread until exclusive access to 
-       * the Queue can be obtained or until an exception is thrown.
-       *
-       * @return bool true if cancel() was called prior to this method, otherwise false.
-       * 
        * @see Queue::isCanceled()
        */
       virtual bool isCanceled() {
@@ -211,14 +161,6 @@ namespace ZThread {
       }
 
       /**
-       * Count the items present in this Queue. 
-       *
-       * This method will block the calling thread until exclusive access to 
-       * the Queue can be obtained or until an exception is thrown.
-       *
-       * @return size_t number of elements available in the Queue. These are
-       * retrievable through the next() methods.
-       *
        * @see Queue::size()
        */
       virtual size_t size() {
@@ -229,15 +171,7 @@ namespace ZThread {
       }
 
       /**
-       * Count the items present in this Queue. 
-       *
-       * This method will block the calling thread until exclusive access to 
-       * the Queue can be obtained or until an exception is thrown.
-       *
-       * @return size_t number of elements available in the Queue. These are
-       * retrievable through the next() methods.
-       *
-       * @see Queue::size(unsigned long)
+       * @see Queue::size(unsigned long timeout)
        */
       virtual size_t size(unsigned long timeout) {
 
@@ -251,7 +185,3 @@ namespace ZThread {
 } // namespace ZThread
 
 #endif // __ZTLOCKEDQUEUE_H__
-
-
-
-
