@@ -21,8 +21,7 @@
 
 #include "zthread/PoolExecutor.h"
 #include "zthread/MonitoredQueue.h"
-#include "zthread/Mutex.h"
-#include "Debug.h"
+#include "zthread/FastMutex.h"
 #include "ThreadImpl.h"
 #include "ThreadQueue.h"
 
@@ -66,7 +65,7 @@ namespace ZThread {
         operator size_t() { return count; }
       };
       
-      Mutex     _lock;
+      FastMutex     _lock;
       GroupList _list;
       size_t    _id;
       size_t    _generation;
@@ -153,7 +152,7 @@ namespace ZThread {
        */
       std::pair<size_t, size_t> increment() {
         
-        Guard<Mutex> g(_lock);
+        Guard<Lockable> g(_lock);
         
         // At least one empty-group exists
         assert(!_list.empty());
@@ -194,7 +193,7 @@ namespace ZThread {
        */
       void decrement(size_t n) {
        
-        Guard<Mutex> g1(_lock);
+        Guard<Lockable> g1(_lock);
        
         // At least 1 non-empty group exists
         assert((size_t)std::for_each(_list.begin(), _list.end(), counter()) > 0);
@@ -261,7 +260,7 @@ namespace ZThread {
        */
       size_t generation(bool next = false) {
 
-        Guard<Mutex> g(_lock);
+        Guard<Lockable> g(_lock);
         return next ? _generation++ : _generation;
 
       }
@@ -366,7 +365,7 @@ namespace ZThread {
      */
     class ExecutorImpl {
       
-      typedef MonitoredQueue<ExecutorTask, Mutex> TaskQueue;
+      typedef MonitoredQueue<ExecutorTask, FastMutex> TaskQueue;
       typedef std::deque<ThreadImpl*> ThreadList;
       
       TaskQueue   _taskQueue;
@@ -379,6 +378,7 @@ namespace ZThread {
     public:
       
       ExecutorImpl() : _size(0) {}
+
 
       void registerThread() {
 
@@ -514,7 +514,7 @@ namespace ZThread {
       //! Create a Worker that draws upon the given Queue
       Worker(const CountedPtr< ExecutorImpl >& impl) 
         : _impl(impl) { }
-      
+   
       //! Run until Thread or Queue are canceled
       void run() { 
         
@@ -530,7 +530,7 @@ namespace ZThread {
         } 
         
         _impl->unregisterThread();
-        
+   
       }
       
     }; /* Worker */
