@@ -33,7 +33,7 @@ namespace ZThread {
    * @class CountedPtr
    *
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-16T17:53:44-0400>
+   * @date <2003-07-26T07:00:10-0400>
    * @version 2.3.0
    *
    */
@@ -47,7 +47,7 @@ namespace ZThread {
 
       public:
 
-      CountedPtr() : _count(new CountT()), _instance(0) { }
+      CountedPtr() : _count(0), _instance(0) { }
 
       explicit CountedPtr(T* raw) : _count(new CountT()), _instance(raw) {
         (*_count)++;
@@ -61,7 +61,7 @@ namespace ZThread {
       CountedPtr(const CountedPtr& ptr) : _count(ptr._count), _instance(ptr._instance) {
 
         if(_count)
-        (*_count)++;
+          (*_count)++;
 
       }
 
@@ -69,7 +69,7 @@ namespace ZThread {
       CountedPtr(const CountedPtr<U, V>& ptr) : _count(ptr._count), _instance(ptr._instance) {
 
         if(_count)
-        (*_count)++;
+          (*_count)++;
 
       }
 
@@ -78,7 +78,7 @@ namespace ZThread {
         if(_count && --(*_count) == 0) {
    
           if(_instance) 
-          delete _instance;
+            delete _instance;
 
           delete _count;
       
@@ -88,9 +88,9 @@ namespace ZThread {
   
       const CountedPtr& operator=(const CountedPtr& ptr) {
     
-        typedef CountedPtr<T, CountT> this_type;
+        typedef CountedPtr<T, CountT> ThisT;
 
-        this_type(ptr).swap(*this);
+        ThisT(ptr).swap(*this);
         return *this;
 
       } 
@@ -98,40 +98,32 @@ namespace ZThread {
       template <typename U, typename V>
       const CountedPtr& operator=(const CountedPtr<U, V>& ptr) {
     
-        typedef CountedPtr<T, CountT> this_type;
+        typedef CountedPtr<T, CountT> ThisT;
 
-        this_type(ptr).swap(*this);
+        ThisT(ptr).swap(*this);
         return *this;
 
       } 
 
       void reset() {
 
-        typedef CountedPtr<T, CountT> this_type;
-        this_type().swap(*this);
+        typedef CountedPtr<T, CountT> ThisT;
+        ThisT().swap(*this);
 
       }
 
       void swap(CountedPtr& ptr) {
 
-        if(ptr._count != _count) {
-
-          std::swap(_count, ptr._count);
-          std::swap(_instance, ptr._instance);
-
-        }
+        std::swap(_count, ptr._count);
+        std::swap(_instance, ptr._instance);
 
       }
   
       template <typename U, typename V>
       void swap(CountedPtr<U, V>& ptr) {
 
-        if(ptr._count != _count) {
-
-          std::swap(_count, ptr._count);
-          std::swap(_instance, ptr._instance);
-
-        }
+        std::swap(_count, ptr._count);
+        std::swap(_instance, ptr._instance);
 
       }
 

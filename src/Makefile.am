@@ -16,7 +16,6 @@ LIBADD=@LINKER_OPTIONS@ @EXTRA_LINKER_OPTIONS@
 
 
 libZThread_la_SOURCES = \
-AbstractThreadLocal.cxx \
 AtomicCount.cxx \
 Condition.cxx \
 ConcurrentExecutor.cxx \
@@ -37,7 +36,7 @@ SynchronousExecutor.cxx \
 Thread.cxx \
 ThreadedExecutor.cxx \
 ThreadImpl.cxx \
-ThreadLocalMap.cxx \
+ThreadLocalImpl.cxx \
 ThreadQueue.cxx \
 Time.cxx \
 ThreadOps.cxx

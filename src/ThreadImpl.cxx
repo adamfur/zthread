@@ -31,27 +31,27 @@
 namespace ZThread {
 
   TSS<ThreadImpl*> ThreadImpl::_threadMap;
-  
-  class Launcher : public Runnable {
-    
-    ThreadImpl* x;
-    ThreadImpl* y;
-    Task z;
-    
-  public:
-    
-    Launcher(ThreadImpl* a, ThreadImpl* b, const Task& c) : x(a), y(b), z(c) {}
-    
-    void run() {      
-      y->dispatch(x,y,z);      
-    }
-    
-    virtual ~Launcher() {
-      
-    }
 
-  };
+  namespace {
   
+    class Launcher : public Runnable {
+      
+      ThreadImpl* x;
+      ThreadImpl* y;
+      Task z;
+      
+    public:
+      
+      Launcher(ThreadImpl* a, ThreadImpl* b, const Task& c) : x(a), y(b), z(c) {}
+      
+      void run() {      
+        y->dispatch(x,y,z);      
+      }
+            
+    };
+    
+  }
+
   ThreadImpl::ThreadImpl() 
     : _state(State::REFERENCE), _priority(Medium), _autoCancel(false) {
     
@@ -71,6 +71,8 @@ namespace ZThread {
   
   ThreadImpl::~ThreadImpl() {
     
+    _tls.clear();
+
     if(isActive()) {
       
       ZTDEBUG("You are destroying an executing thread!\n");
@@ -107,10 +109,7 @@ namespace ZThread {
     return _priority;  
   }
   
-  ThreadLocalMap& ThreadImpl::getThreadLocalMap() {
-    return _localValues;
-  }
-  
+ 
 
   bool ThreadImpl::isReference() {
     return _state.isReference();
@@ -372,6 +371,7 @@ namespace ZThread {
 
   }
 
+
   void ThreadImpl::dispatch(ThreadImpl* parent, ThreadImpl* impl, Task task) {
 
     // Map the implementation object onto the running thread.
@@ -386,17 +386,17 @@ namespace ZThread {
       ThreadOps::setPriority(impl, 
                              parent->_state.isReference() ? impl->_priority : parent->_priority);
 
-    // Copy values to inherit, propogate after the parent is released.
-    ThreadLocalMap inheritedLocals(parent->_localValues);
+    // Inherit ThreadLocal values from the parent
+    typedef ThreadLocalMap::const_iterator It;
 
+    for(It i = parent->getThreadLocalMap().begin(); i != parent->getThreadLocalMap().end(); ++i) 
+      if( (i->second)->isInheritable() )
+        impl->getThreadLocalMap()[ i->first ] = (i->second)->clone();
+    
     // Insert a user-thread mapping 
     ThreadQueue::instance()->insertUserThread(impl);
-
     // Wake the parent once the thread is setup
     parent->_monitor.notify();
-
-    // Propogate the inherited values
-    impl->_localValues = inheritedLocals;
 
     ZTDEBUG("Thread starting...\n");
 
@@ -437,11 +437,11 @@ namespace ZThread {
 
     ZTDEBUG("Thread exiting...\n"); 
 
-    // Cleanup the ThreadLocals
-    impl->_localValues.clear();
-
     // Insert a pending-thread mapping, allowing the resources to be reclaimed 
     ThreadQueue::instance()->insertPendingThread(impl);
+
+    // Cleanup ThreadLocal values
+    impl->getThreadLocalMap().clear();
 
     // Update the reference count allowing it to be destroyed 
     impl->delReference();

@@ -23,6 +23,7 @@
 #ifndef __ZTTHREADIMPL_H__
 #define __ZTTHREADIMPL_H__
 
+#include "zthread/ThreadLocalImpl.h"
 #include "zthread/Thread.h"
 #include "zthread/Exceptions.h"
 #include "zthread/IntrusivePtr.h"
@@ -31,8 +32,8 @@
 #include "TSS.h"
 #include "ThreadOps.h"
 #include "State.h"
-#include "ThreadLocalMap.h"
 
+#include <map>
 #include <deque>
 
 namespace ZThread {
@@ -40,7 +41,7 @@ namespace ZThread {
 /**
  * @class ThreadImpl
  * @author Eric Crahen <crahen@cse.buffalo.edu>
- * @date <2003-07-16T20:10:03-0400>
+ * @date <2003-07-26T12:39:17-0400>
  * @version 2.3.0
  */
 class ThreadImpl : public IntrusivePtr<ThreadImpl, FastLock>, public ThreadOps {
@@ -59,8 +60,13 @@ class ThreadImpl : public IntrusivePtr<ThreadImpl, FastLock>, public ThreadOps {
   //! Joining threads
   List _joiners;
 
-  //! Mapping of the ThreadLocal associations
-  ThreadLocalMap _localValues;
+ public:
+  
+  typedef std::map<const ThreadLocalImpl*, ThreadLocalImpl::ValuePtr > ThreadLocalMap;
+
+ private:
+  
+  ThreadLocalMap _tls;
 
   //! Cached thread priority
   Priority _priority;
@@ -90,8 +96,9 @@ class ThreadImpl : public IntrusivePtr<ThreadImpl, FastLock>, public ThreadOps {
 
   Priority getPriority() const;
 
-  ThreadLocalMap& getThreadLocalMap();
-  
+  //  ThreadLocalMap& getThreadLocalMap();
+  ThreadLocalMap& getThreadLocalMap() { return _tls; }
+
   bool join(unsigned long); 
   
   void setPriority(Priority);
