@@ -34,7 +34,7 @@ namespace ZThread {
    * @class BoundedQueue
    *
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-07T22:11:40-0400>
+   * @date <2003-07-08T09:37:33-0400>
    * @version 2.3.0
    *
    * A BoundedQueues is a Queue implementation that provides  serialized access to the 
@@ -160,7 +160,7 @@ namespace ZThread {
           _queue.push_back(item);
           _notEmpty.signal(); // Wake any waiters
       
-        } catch(TimeOut_Exception&) { return false; }
+        } catch(Timeout_Exception&) { return false; }
     
         return true;
 
