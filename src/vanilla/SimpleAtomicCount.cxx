@@ -24,7 +24,6 @@
 
 #include "zthread/Guard.h"
 #include "../FastLock.h"
-#include "../Debug.h"
 
 #include <assert.h>
 
@@ -61,7 +60,6 @@ size_t AtomicCount::operator--(int) {
   ATOMIC_COUNT* c = reinterpret_cast<ATOMIC_COUNT*>(_value);
   
   Guard<FastLock> g(c->lock);
-  ZTDEBUG("postfix-- %d\n", c->count);
   return c->count--;
 
 }
@@ -72,7 +70,6 @@ size_t AtomicCount::operator++(int) {
   ATOMIC_COUNT* c = reinterpret_cast<ATOMIC_COUNT*>(_value);
   
   Guard<FastLock> g(c->lock);
-  ZTDEBUG("postfix++ %d\n", c->count);
   return c->count++;
 
 }
@@ -83,7 +80,6 @@ size_t AtomicCount::operator--() {
   ATOMIC_COUNT* c = reinterpret_cast<ATOMIC_COUNT*>(_value);
   
   Guard<FastLock> g(c->lock);
-  ZTDEBUG("prefix-- %d\n", c->count);
   return --c->count;
 
 }
@@ -94,7 +90,6 @@ size_t AtomicCount::operator++() {
   ATOMIC_COUNT* c = reinterpret_cast<ATOMIC_COUNT*>(_value);
   
   Guard<FastLock> g(c->lock);
-  ZTDEBUG("prefix++ %d\n", c->count);
   return ++c->count;
 
 }
