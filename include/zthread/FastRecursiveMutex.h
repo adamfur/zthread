@@ -33,7 +33,7 @@ namespace ZThread {
    * @class FastRecursiveMutex
    *
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-16T17:49:00-0400>
+   * @date <2003-07-19T19:00:25-0400>
    * @version 2.2.0
    *
    * A FastRecursiveMutex is a small fast implementation of a recursive, mutally exclusive
@@ -41,15 +41,14 @@ namespace ZThread {
    * as it involved the least overhead. However, this slight increase in speed is 
    * gained by sacrificing the robustness provided by the other classes. 
    *
-   * Typically, a FastRecursiveMutex is implemented using a spin lock. It should be reserved 
-   * for synchronizing short sections of code.
+   * A FastRecursiveMutex has the useful property of not being interruptable; that is to say  
+   * that acquire() and tryAcquire() will not throw Interrupted_Exceptions.
    *
    * @see RecursiveMutex
    *
    * <b>Scheduling</b>
    *
    * Scheduling is left to the operating systems and may vary.
-
    *
    * <b>Error Checking</b>
    *
@@ -68,28 +67,36 @@ namespace ZThread {
     virtual ~FastRecursiveMutex();
 
     /**
-     * Acquire exclusive access. No safety or state checks are performed.
+     * Acquire exclusive access to the mutex. The calling thread will block until the 
+     * lock can be acquired. No safety or state checks are performed. The calling thread
+     * may acquire the mutex nore than once.
+     *
+     * @post The calling thread obtains the lock successfully if no exception is thrown.
+     * @exception Interrupted_Exception never thrown
      */
     virtual void acquire();
-
+  
     /**
-     * Release exclusive access. No safety or state checks are performed.
+     * Release access. No safety or state checks are performed.
      * 
-     * @pre This should not be called more times than the acquire() method was 
-     *      called.
+     * @pre the caller should have previously acquired this lock at least once.
      */
     virtual void release();
   
     /**
-     * Try to acquire exclusive access. No safety or state checks are performed.
-     * This function returns immediately regardless of the value of the timeout
+     * Try to acquire exclusive access to the mutex. The calling thread will block until the 
+     * lock can be acquired. No safety or state checks are performed. The calling thread
+     * may acquire the mutex more than once.
      *
      * @param timeout unused
      * @return 
      * - <em>true</em> if the lock was acquired
      * - <em>false</em> if the lock was acquired
+     *
+     * @post The calling thread obtains the lock successfully if no exception is thrown.
+     * @exception Interrupted_Exception never thrown
      */
-    virtual bool tryAcquire(unsigned long timeout = 0);
+    virtual bool tryAcquire(unsigned long timeout);
   
   }; 
 

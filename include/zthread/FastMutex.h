@@ -32,7 +32,7 @@ namespace ZThread {
   /**
    * @class FastMutex
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-19T18:31:09-0400>
+   * @date <2003-07-19T18:45:39-0400>
    * @version 2.2.0
    *
    * A FastMutex is a small fast implementation of a non-recursive, mutually exclusive
@@ -66,10 +66,14 @@ namespace ZThread {
     virtual ~FastMutex();
   
     /**
-     * Acquire exclusive access. No safety or state checks are performed.
+     * Acquire exclusive access to the mutex. The calling thread will block until the 
+     * lock can be acquired. No safety or state checks are performed.
      * 
-     * @pre the caller should <i>not</i> have previously acquired this lock
+     * @pre The calling thread should <i>not</i> have previously acquired this lock.
+     *      Deadlock will result if the same thread attempts to acquire the mutex more 
+     *      than once. 
      *
+     * @post The calling thread obtains the lock successfully if no exception is thrown.
      * @exception Interrupted_Exception never thrown
      */
     virtual void acquire();
@@ -82,16 +86,19 @@ namespace ZThread {
     virtual void release();
   
     /**
-     * Try to acquire exclusive access. No safety or state checks are performed.
-     * This function returns immediately regardless of the value of the timeout
+     * Try to acquire exclusive access to the mutex. The calling thread will block until the 
+     * lock can be acquired. No safety or state checks are performed.
+     * 
+     * @pre The calling thread should <i>not</i> have previously acquired this lock.
+     *      Deadlock will result if the same thread attempts to acquire the mutex more 
+     *      than once. 
      *
      * @param timeout unused
      * @return 
      * - <em>true</em> if the lock was acquired
      * - <em>false</em> if the lock was acquired
      *
-     * @pre the caller should <i>not</i> have previously acquired this lock
-     *
+     * @post The calling thread obtains the lock successfully if no exception is thrown.
      * @exception Interrupted_Exception never thrown
      */
     virtual bool tryAcquire(unsigned long timeout);
