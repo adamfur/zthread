@@ -153,7 +153,6 @@ target_os = @target_os@
 target_vendor = @target_vendor@
 
 EXTRA_DIST = \
-README.1ST \
 BUILDING \
 THANK.YOU \
 LGPL.TXT \
@@ -578,7 +577,12 @@ uninstall-local:
 	-rm -rf $(datadir)/aclocal/pthread.m4
 	-rm -rf $(datadir)/aclocal/zthread.m4
 
-dist-hook:
+distclean-hook:
+	find $(distdir)/* -type d -name autom4te.cache -print0 | xargs -0 rm -rf
+	find $(distdir)/* -type d -name \*CVS -print0 | xargs -0 rm -rf
+	find $(distdir)/* -type f -name \*~ -print0 | xargs -0 rm -rf
+
+dist-hook: distclean-hook
 	cp -pR $(top_srcdir)/build $(distdir)
 	cp -pR $(top_srcdir)/build/VC6 $(distdir)
 	cp -pR $(top_srcdir)/build/VC7 $(distdir)
@@ -595,8 +599,6 @@ dist-hook:
 	cp -pR $(top_srcdir)/src/win32 $(distdir)/src
 	cp -pR $(top_srcdir)/src/win9x $(distdir)/src
 	cp -pR $(top_srcdir)/src/vanilla $(distdir)/src
-	find $(distdir)/* -type d -name \*CVS -print0 | xargs -0 rm -rf
-	find $(distdir)/* -type f -name \*~ -print0 | xargs -0 rm -rf
 
 rpm: dist
 	rpm -ta $(PACKAGE)-$(VERSION).tar.gz

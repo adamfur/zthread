@@ -1,7 +1,6 @@
 
 ## extra files
 EXTRA_DIST = \
-README.1ST \
 BUILDING \
 THANK.YOU \
 LGPL.TXT \
@@ -26,8 +25,14 @@ uninstall-local:
 	-rm -rf $(datadir)/aclocal/pthread.m4
 	-rm -rf $(datadir)/aclocal/zthread.m4
 
+## clean out the build files
+distclean-hook:
+	find $(distdir)/* -type d -name autom4te.cache -print0 | xargs -0 rm -rf
+	find $(distdir)/* -type d -name \*CVS -print0 | xargs -0 rm -rf
+	find $(distdir)/* -type f -name \*~ -print0 | xargs -0 rm -rf
+
 ## include the doc & share directories in the distribution
-dist-hook:
+dist-hook: distclean-hook
 	cp -pR $(top_srcdir)/build $(distdir)
 	cp -pR $(top_srcdir)/build/VC6 $(distdir)
 	cp -pR $(top_srcdir)/build/VC7 $(distdir)
@@ -44,8 +49,6 @@ dist-hook:
 	cp -pR $(top_srcdir)/src/win32 $(distdir)/src
 	cp -pR $(top_srcdir)/src/win9x $(distdir)/src
 	cp -pR $(top_srcdir)/src/vanilla $(distdir)/src
-	find $(distdir)/* -type d -name \*CVS -print0 | xargs -0 rm -rf
-	find $(distdir)/* -type f -name \*~ -print0 | xargs -0 rm -rf
 
 ## RPM from the distribution rule
 rpm: dist
