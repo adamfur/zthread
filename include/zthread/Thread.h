@@ -34,11 +34,165 @@ namespace ZThread {
   
   /**
    * @class Thread
-   *
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-20T05:23:23-0400>
+   * @date <2003-07-27T11:17:59-0400>
    * @version 2.3.0
    *
+   *
+   * @see Task
+   * @see Executor
+   *
+   * <h2>Examples</h2>
+   * - <a href="#ex1">Launching a task</a>
+   * - <a href="#ex2">Waiting for a task</a>
+   * - <a href="#ex3">Sharing a task</a>
+   *
+   * <h2><a name="ex1">Launching a task</a></h2>
+   *
+   * A thread is started simply by constructing a thread object and giving 
+   * it a task to perform. The thread will continue to run its task, even 
+   * after the Thread object used to launch the thread has gone out of scope.
+   *
+   * @code
+   * #include "zthread/Thread.h"
+   * #include <iostream>
+   *
+   * using namespace ZThread;
+   *
+   * class aRunnable : public Runnable {
+   *
+   *   void run() {
+   *
+   *     Thread::sleep(1000);
+   *     std::cout << "Hello from another thread" << std::endl;
+   *
+   *   }
+   *
+   * };
+   *
+   * int main() {
+   *
+   *   try {
+   *     
+   *     // Implictly constructs a Task
+   *     Thread t(new aRunnable);
+   *
+   *   } catch(Synchronization_Exception& e) { 
+   *     std::cerr << e.what() << std::endl; 
+   *   }
+   *
+   *   std::cout << "Hello from the main thread" << std::endl;
+   *
+   *   // Output:
+   *
+   *   // Hello from the main thread
+   *   // Hello from another thread
+   *
+   *   return 0;
+   *
+   * }
+   *
+   * @endcode
+   *
+   * <h2><a name="ex2">Waiting for a task</a></h2>
+   *
+   * A user can exercise some simple synchronization by waiting for a thread
+   * to complete running its task.
+   *
+   * @code
+   * #include "zthread/Thread.h"
+   * #include <iostream>
+   *
+   * using namespace ZThread;
+   *
+   * class aRunnable : public Runnable {
+   * public:
+   *
+   *   void run() {
+   *
+   *     Thread::sleep(1000);
+   *     std::cout << "Hello from another thread" << std::endl;
+   *
+   *   }
+   *
+   * };
+   *
+   * int main() {
+   *
+   *   try {
+   *     
+   *     // Implictly constructs a Task
+   *     Thread t(new aRunnable);
+   *     t.wait();
+   *
+   *   } catch(Synchronization_Exception& e) { 
+   *     std::cerr << e.what() << std::endl; 
+   *   }
+   *
+   *   std::cout << "Hello from the main thread" << std::endl;
+   *
+   *   // Output:
+   *
+   *   // Hello from another thread
+   *   // Hello from the main thread
+   *
+   *   return 0;
+   *
+   * }
+   *
+   * @endcode
+   *
+   * <h2><a name="ex3">Sharing a task</a></h2>
+   *
+   * The same task can be shared by more than one thread. A Task is constructed
+   * from a Runnable, and that Task object is copied by value and handed off to
+   * each thread.
+   *
+   * @code
+   * #include "zthread/Thread.h"
+   * #include <iostream>
+   *
+   * using namespace ZThread;
+   *
+   * class aRunnable : public Runnable {
+   *
+   *   void run() {
+   *
+   *     Thread::sleep(1000);
+   *     std::cout << "Hello from another thread" << std::endl;
+   *
+   *   }
+   *
+   * };
+   *
+   * int main() {
+   *
+   *   try {
+   *     
+   *     // Explictly constructs a Task
+   *     Task task(new aRunnable);
+   *
+   *     // Two threads created to run the same Task
+   *     Thread t1(task);
+   *     Thread t2(task);
+   *
+   *   } catch(Synchronization_Exception& e) { 
+   *     std::cerr << e.what() << std::endl; 
+   *   }
+   *
+   *   std::cout << "Hello from the main thread" << std::endl;
+   *
+   *   // Output:
+   *
+   *   // Hello from the main thread
+   *   // Hello from another thread
+   *   // Hello from another thread
+   *
+   *   return 0;
+   *
+   * }
+   *
+   * @endcode
    */
   class ZTHREAD_API Thread 
     : public Cancelable, public Waitable, public NonCopyable {
@@ -50,6 +204,7 @@ namespace ZThread {
 
     /**
      * Create a Thread that represents the current thread.
+     * <em>Using the static members of Thread should be preferred over using this constructor</em>
      */
     Thread();
 

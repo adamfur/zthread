@@ -30,7 +30,7 @@ namespace ZThread {
    * @class ThreadLocal
    *
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-27T10:19:22-0400>
+   * @date <2003-07-27T11:18:21-0400>
    * @version 2.3.0
    *
    * Provides access to store and retrieve value types to and from a thread local 
@@ -59,9 +59,13 @@ namespace ZThread {
    * - Inheritance can be controlled explicitly by the user through a third functor, 
    *   InheritableValueT.
    *
-   * <h3>Examples</h3>
+   * <h2>Examples</h2>
    *
+   * - <a href="#ex1">Default initial value</a>
+   * - <a href="#ex2">User-specified initial value</a>
+   * - <a href="#ex3">User-specified inherited value</a>
    *
+   * <h2><a name="ex1">Default initial value</a></h2>
    * A ThreadLocal that does not inherit, and uses the default value
    * for an int as its initial value. 
    *
@@ -96,11 +100,13 @@ namespace ZThread {
    *   // 0
    *   // 0
    *
+   *   return 0;
+   *
    * }
    *
    * @endcode
    *
-   *
+   * <h2><a name="ex2">User-specified initial value</a></h2>
    * A ThreadLocal that does not inherit, and uses a custom initial value.
    *
    * @code 
@@ -142,11 +148,13 @@ namespace ZThread {
    *   // 200
    *   // 300
    *
+   *   return 0;
+   *
    * }
    *
    * @endcode
    *
-   *
+   * <h2><a name="ex3">User-specified inherited value</a></h2>
    * A ThreadLocal that does inherit and modify child values. 
    * (The default initial value functor is used)
    *
@@ -214,11 +222,13 @@ namespace ZThread {
    *   // 200
    *   // 200
    *
+   *   return 0;
+   *
    * }
    *
    * @endcode
    *
-   * <h3>Parameters</h3>
+   * <h2>Parameters</h2>
    *
    * <em>InitialValueT</em>
    *
