@@ -21,7 +21,7 @@
 
 #include "zthread/ThreadedExecutor.h"
 #include "zthread/Guard.h"
-#include "zthread/Mutex.h"
+#include "zthread/FastMutex.h"
 #include "zthread/Time.h"
 
 #include "ThreadImpl.h"
@@ -61,7 +61,7 @@ namespace ZThread {
         operator size_t() { return count; }
       };
       
-      Mutex     _lock;
+      FastMutex     _lock;
       GroupList _list;
       size_t    _id;
       size_t    _generation;
@@ -148,7 +148,7 @@ namespace ZThread {
        */
       std::pair<size_t, size_t> increment() {
         
-        Guard<Mutex> g(_lock);
+        Guard<FastMutex> g(_lock);
         
         // At least one empty-group exists
         assert(!_list.empty());
@@ -189,7 +189,7 @@ namespace ZThread {
        */
       void decrement(size_t n) {
 
-        Guard<Mutex> g1(_lock);
+        Guard<FastMutex> g1(_lock);
 
         // At least 1 non-empty group exists
         assert((size_t)std::for_each(_list.begin(), _list.end(), counter()) > 0);
@@ -256,7 +256,7 @@ namespace ZThread {
        */
       size_t generation(bool next = false) {
 
-        Guard<Mutex> g(_lock);
+        Guard<FastMutex> g(_lock);
         return next ? _generation++ : _generation;
 
       }
@@ -306,7 +306,7 @@ namespace ZThread {
       typedef std::deque<ThreadImpl*> ThreadList;
 
       bool _canceled;
-      Mutex _lock;      
+      FastMutex _lock;      
 
       //! Worker threads
       ThreadList _threads;
@@ -330,7 +330,7 @@ namespace ZThread {
         // Enqueue for possible future interrupt() 
         else {
 
-          Guard<Mutex> g(_lock);
+          Guard<FastMutex> g(_lock);
           _threads.push_back( ThreadImpl::current() );
 
         }
@@ -339,14 +339,14 @@ namespace ZThread {
 
       void unregisterThread() {
         
-        Guard<Mutex> g(_lock);
+        Guard<FastMutex> g(_lock);
         std::remove(_threads.begin(), _threads.end(), ThreadImpl::current() );
 
       }
 
       void cancel() {
 
-        Guard<Mutex> g(_lock);
+        Guard<FastMutex> g(_lock);
         _canceled = true;
 
       }
@@ -356,14 +356,14 @@ namespace ZThread {
         if(_canceled)
           return true;
 
-        Guard<Mutex> g(_lock);
+        Guard<FastMutex> g(_lock);
         return _canceled;
 
       }
 
       void interrupt() {
 
-        Guard<Mutex> g(_lock);
+        Guard<FastMutex> g(_lock);
 
         // Interrupt all the registered threads
         for(ThreadList::iterator i = _threads.begin(); i != _threads.end(); ++i)

@@ -90,7 +90,7 @@ namespace ZThread {
 
         Monitor::STATE state;
 
-        Guard<Lockable> g1(_lock);
+        Guard<FastMutex> g1(_lock);
 
         // At least one empty-group exists
         assert(!_list.empty());
@@ -107,7 +107,7 @@ namespace ZThread {
         
         {
 
-          Guard<Lockable, UnlockedScope> g2(g1);          
+          Guard<FastMutex, UnlockedScope> g2(g1);          
           state = timeout == 0 ? m.wait() : m.wait(timeout);
 
         }
@@ -152,7 +152,7 @@ namespace ZThread {
        */
       std::pair<size_t, size_t> increment() {
         
-        Guard<Lockable> g(_lock);
+        Guard<FastMutex> g(_lock);
         
         // At least one empty-group exists
         assert(!_list.empty());
@@ -193,7 +193,7 @@ namespace ZThread {
        */
       void decrement(size_t n) {
        
-        Guard<Lockable> g1(_lock);
+        Guard<FastMutex> g1(_lock);
        
         // At least 1 non-empty group exists
         assert((size_t)std::for_each(_list.begin(), _list.end(), counter()) > 0);
@@ -260,7 +260,7 @@ namespace ZThread {
        */
       size_t generation(bool next = false) {
 
-        Guard<Lockable> g(_lock);
+        Guard<FastMutex> g(_lock);
         return next ? _generation++ : _generation;
 
       }
@@ -382,7 +382,7 @@ namespace ZThread {
 
       void registerThread() {
 
-        Guard<Lockable> g(_taskQueue);
+        Guard<FastMutex> g(_taskQueue);
 
         ThreadImpl* impl = ThreadImpl::current();
         _threads.push_back(impl);
@@ -395,7 +395,7 @@ namespace ZThread {
 
       void unregisterThread() {
 
-        Guard<Lockable> g(_taskQueue);
+        Guard<FastMutex> g(_taskQueue);
         std::remove(_threads.begin(), _threads.end(), ThreadImpl::current());
 
       }
@@ -425,7 +425,7 @@ namespace ZThread {
         // Bump the generation number
         _waitingQueue.generation(true);
 
-        Guard<Lockable> g(_taskQueue);
+        Guard<FastMutex> g(_taskQueue);
         
         // Interrupt all threads currently running, thier tasks would be
         // from an older generation
@@ -437,7 +437,7 @@ namespace ZThread {
       //! Adjust the number of desired workers and return the number of Threads needed
       size_t workers(size_t n) {
         
-        Guard<Lockable> g(_taskQueue);
+        Guard<FastMutex> g(_taskQueue);
 
         size_t m = (_size < n) ? (n - _size) : 0;
         _size = n;
@@ -448,7 +448,7 @@ namespace ZThread {
       
       size_t workers() {
         
-        Guard<Lockable> g(_taskQueue);
+        Guard<FastMutex> g(_taskQueue);
         return _size;
         
       }
