@@ -22,61 +22,26 @@
 #ifndef __ZTTHREAD_H__
 #define __ZTTHREAD_H__
 
-#include "zthread/CountedPtr.h"
 #include "zthread/Cancelable.h"
 #include "zthread/Priority.h"
 #include "zthread/NonCopyable.h"
-#include "zthread/Runnable.h"
+#include "zthread/Task.h"
+#include "zthread/Waitable.h"
 
 namespace ZThread {
   
   class ThreadImpl;
   
   /**
-   * @class Task
-   *
-   * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-16T23:14:48-0400>
-   * @version 2.3.0
-   *
-   * A Task provides a CountedPtr wrapper for Runnable objects. 
-   * This wrapper enables an implicit conversion from a 
-   * <i>Runnable*</i> to a <i>Task</i> adding some syntactic sugar 
-   * to the interface.
-   */
-  class ZTHREAD_API Task : public CountedPtr<Runnable, AtomicCount> {
-  public:
-    
-    Task(Runnable* raw)
-      : CountedPtr<Runnable, AtomicCount>(raw) { } 
-    
-    template <typename U>
-      Task(U* raw)
-      : CountedPtr<Runnable, AtomicCount>(raw) { } 
-    
-    Task(const CountedPtr<Runnable, AtomicCount>& ptr) 
-      : CountedPtr<Runnable, AtomicCount>(ptr) { } 
-    
-    template <typename U, typename V>
-      Task(const CountedPtr<U, V>& ptr) 
-      : CountedPtr<Runnable, AtomicCount>(ptr) { } 
-    
-    void operator()() {
-      (*this)->run();
-    }
-    
-  }; /* Task */
-  
-  
-  /**
    * @class Thread
    *
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-16T23:14:48-0400>
+   * @date <2003-07-20T05:23:23-0400>
    * @version 2.3.0
    *
    */
-  class ZTHREAD_API Thread : public Cancelable, public NonCopyable {
+  class ZTHREAD_API Thread 
+    : public Cancelable, public Waitable, public NonCopyable {
 
     //! Delegate
     ThreadImpl* _impl;
@@ -100,7 +65,7 @@ namespace ZThread {
     Thread(const Task&, bool autoCancel = false);
 
     //! Destroy the Thread
-    virtual ~Thread();
+    ~Thread();
 
     //! Comparison operator
     bool operator==(const Thread& t) const;
@@ -112,19 +77,33 @@ namespace ZThread {
 
     /**
      * Wait for the thread represented by this object to complete its task.
+     * The calling thread is blocked until the thread represented by this
+     * object exits.
      *
-     * @param timeout maximum amount of time (milliseconds) this method could block.
-     *                A timeout of 0 will block indefinently.
+     * @exception Deadlock_Exception thrown if thread attempts to join itself
+     * @exception InvalidOp_Exception thrown if the thread cannot be joined
+     * @exception Interrupted_Exception thrown if the joining thread has been interrupt()ed
+     */
+    void wait();
+ 
+    /**
+     * Wait for the thread represented by this object to complete its task.
+     * The calling thread is blocked until the thread represented by this
+     * object exits, or until the timeout expires.
+     *
+     * @param timeout maximum amount of time (milliseconds) this method 
+     *        could block the calling thread.
      *
      * @return 
-     *   - <em>true</em> if the thread task complete before <i>timeout</i> milliseconds elapse.
+     *   - <em>true</em> if the thread task complete before <i>timeout</i> 
+     *     milliseconds elapse.
      *   - <em>false</em> othewise.
      *
      * @exception Deadlock_Exception thrown if thread attempts to join itself
      * @exception InvalidOp_Exception thrown if the thread cannot be joined
      * @exception Interrupted_Exception thrown if the joining thread has been interrupt()ed
      */
-    bool join(unsigned long timeout = 0);
+    bool wait(unsigned long timeout);
  
     /**
      * Change the priority of this Thread. This will change the actual

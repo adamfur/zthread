@@ -52,9 +52,13 @@ namespace ZThread {
 
   }
 
-  bool Thread::join(unsigned long timeout) {
+  void Thread::wait() {
+    _impl->join(0);
+  }
 
-    return _impl->join(timeout);
+  bool Thread::wait(unsigned long timeout) {
+
+    return _impl->join(timeout == 0 ? 1 : timeout);
 
   }
 
