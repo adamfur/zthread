@@ -94,11 +94,11 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\..\src\AbstractThreadLocal.cxx
+SOURCE=..\..\src\AtomicCount.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\AtomicCount.cxx
+SOURCE=..\..\src\ConcurrentExecutor.cxx
 # End Source File
 # Begin Source File
 
@@ -106,7 +106,27 @@ SOURCE=..\..\src\Condition.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\ConditionImpl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\config.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\CountingSemaphore.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\Debug.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\DeferredInterruptionScope.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\FastLock.h
 # End Source File
 # Begin Source File
 
@@ -114,7 +134,15 @@ SOURCE=..\..\src\FastMutex.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\FastRecursiveLock.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\FastRecursiveMutex.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\IntrusivePtr.h
 # End Source File
 # Begin Source File
 
@@ -122,7 +150,19 @@ SOURCE=..\..\src\Monitor.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\Monitor.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\Mutex.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\MutexImpl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\PoolExecutor.cxx
 # End Source File
 # Begin Source File
 
@@ -150,7 +190,31 @@ SOURCE=..\..\src\RecursiveMutexImpl.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\RecursiveMutexImpl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\Scheduling.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\Semaphore.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\SemaphoreImpl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\State.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\Status.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\SynchronousExecutor.cxx
 # End Source File
 # Begin Source File
 
@@ -158,11 +222,19 @@ SOURCE=..\..\src\Thread.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\ThreadedExecutor.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\ThreadImpl.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\ThreadLocalMap.cxx
+SOURCE=..\..\src\ThreadImpl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\ThreadLocalImpl.cxx
 # End Source File
 # Begin Source File
 
@@ -170,16 +242,32 @@ SOURCE=..\..\src\ThreadOps.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\ThreadOps.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\ThreadQueue.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\ThreadQueue.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\Time.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\TimeStrategy.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\TSS.h
 # End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
-# Begin Source File
-
-SOURCE=..\..\include\zthread\AbstractThreadLocal.h
-# End Source File
 # Begin Source File
 
 SOURCE=..\..\include\zthread\AtomicCount.h
@@ -203,10 +291,6 @@ SOURCE=..\..\include\zthread\BoundedQueue.h
 # Begin Source File
 
 SOURCE=..\..\include\zthread\Cancelable.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\include\zthread\CancelableTask.h
 # End Source File
 # Begin Source File
 
@@ -234,10 +318,6 @@ SOURCE=..\..\include\zthread\CountingSemaphore.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\include\zthread\DefaultThreadFactory.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\include\zthread\Exceptions.h
 # End Source File
 # Begin Source File
@@ -258,23 +338,11 @@ SOURCE=..\..\include\zthread\FastRecursiveMutex.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\include\zthread\Future.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\include\zthread\Guard.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\include\zthread\Handle.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\include\zthread\InheritableThreadLocal.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\include\zthread\IntrusivePtr.h
+SOURCE=..\..\include\zthread\GuardedClass.h
 # End Source File
 # Begin Source File
 
@@ -295,10 +363,6 @@ SOURCE=..\..\include\zthread\Mutex.h
 # Begin Source File
 
 SOURCE=..\..\include\zthread\NonCopyable.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\include\zthread\NullLockable.h
 # End Source File
 # Begin Source File
 
@@ -354,6 +418,10 @@ SOURCE=..\..\include\zthread\SynchronousExecutor.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\include\zthread\Task.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\include\zthread\Thread.h
 # End Source File
 # Begin Source File
@@ -362,15 +430,11 @@ SOURCE=..\..\include\zthread\ThreadedExecutor.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\include\zthread\ThreadFactory.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\include\zthread\ThreadLocal.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\include\zthread\Throwable.h
+SOURCE=..\..\include\zthread\ThreadLocalImpl.h
 # End Source File
 # Begin Source File
 

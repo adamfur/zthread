@@ -72,7 +72,7 @@ namespace ZThread {
         std::remove_copy(_shutdownTasks.begin(), 
                          _shutdownTasks.end(), 
                          std::back_inserter(shutdownTasks), 
-                         Task(0)); 
+                         Task((Runnable*)0)); 
         
       }
 
@@ -89,7 +89,7 @@ namespace ZThread {
     if(threadsWaiting) {
 
       ZTDEBUG("Threads waiting: %d %d\n", _userThreads.size(), _pendingThreads.size());
-      Monitor& m(_waiter->getMonitor());
+      Monitor& m = _waiter->getMonitor();
       
       // Defer interruption while this thread waits for a signal from
       // the last pending user thread

@@ -71,10 +71,11 @@ DISTRIBUTION:
 
 NOTES:
 
-  Please report bugs to me via email
+  Please report bugs to me via email, I don't monitor the bug tracker 
+  or the forums on sf.
 
 HISTORY:
 
-  So far, this library has been tested on MacOS X, Linux, Tru64 Unix, Win95, Win98,
-  WinNT, Win2k, SunOS, Solaris and FreeBSD.
+  So far, this library has been tested on MacOS X, Linux, Tru64 Unix, 
+  Win95, Win98, WinNT, Win2k, WinXP, SunOS, and FreeBSD.
 

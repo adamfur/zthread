@@ -43,9 +43,14 @@ namespace ZThread {
    */
   class ZTHREAD_API Task : public CountedPtr<Runnable, AtomicCount> {
   public:
-    
+
+
+#if !defined(_MSC_VER) || (_MSC_VER > 1200)
+	  
     Task(Runnable* raw)
       : CountedPtr<Runnable, AtomicCount>(raw) { } 
+
+#endif
     
     template <typename U>
       Task(U* raw)

@@ -81,8 +81,8 @@ namespace ZThread {
        */
       bool wait(unsigned long timeout) {
 
-        ThreadImpl* self(ThreadImpl::current());
-        Monitor& m(self->getMonitor());
+        ThreadImpl* self = ThreadImpl::current();
+        Monitor& m = self->getMonitor();
 
         Monitor::STATE state;
 
@@ -276,7 +276,7 @@ namespace ZThread {
         for(ThreadList::iterator i = grp.waiters.begin(); i != grp.waiters.end();) {
           
           ThreadImpl* impl = *i;
-          Monitor& m(impl->getMonitor());
+          Monitor& m = impl->getMonitor();
           
           // Try the monitor lock, if it cant be locked skip to the next waiter
           if(m.tryAcquire()) {

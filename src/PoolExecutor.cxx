@@ -19,6 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
+#include "ThreadImpl.h"
 #include "zthread/PoolExecutor.h"
 #include "zthread/MonitoredQueue.h"
 #include "zthread/FastMutex.h"
@@ -28,6 +29,8 @@
 #include <algorithm>
 #include <deque>
 #include <utility>
+
+using namespace ZThread;
 
 namespace ZThread {
 
@@ -85,8 +88,8 @@ namespace ZThread {
        */
       bool wait(unsigned long timeout) {
 
-        ThreadImpl* self(ThreadImpl::current());
-        Monitor& m(self->getMonitor());
+		ThreadImpl* current = ThreadImpl::current();
+        Monitor& m = current->getMonitor();
 
         Monitor::STATE state;
 
@@ -100,7 +103,7 @@ namespace ZThread {
           return true;
 
         // Update the waiter list for the active group 
-        _list.back().waiters.push_back(self);
+        _list.back().waiters.push_back(current);
         size_t n = _list.back().id;
 
         m.acquire();
@@ -115,12 +118,12 @@ namespace ZThread {
         m.release();
 
         // If awoke due to a reason other than the last task in the group 'n' completing,
-        // then then find the group 'self' is waiting in
+        // then then find the group 'current' is waiting in
         GroupList::iterator i = std::find_if(_list.begin(), _list.end(), by_id(n));
         if(i != _list.end()) {
 
-          // Remove 'self' from that list if it is still a member
-          ThreadList::iterator j = std::find(i->waiters.begin(), i->waiters.end(), self);
+          // Remove 'current' from that list if it is still a member
+          ThreadList::iterator j = std::find(i->waiters.begin(), i->waiters.end(), current);
           if(j != i->waiters.end())
             i->waiters.erase(j);
 
@@ -280,7 +283,7 @@ namespace ZThread {
         for(ThreadList::iterator i = grp.waiters.begin(); i != grp.waiters.end();) {
           
           ThreadImpl* impl = *i;
-          Monitor& m(impl->getMonitor());
+          Monitor& m = impl->getMonitor();
           
           // Try the monitor lock, if it cant be locked skip to the next waiter
           if(m.tryAcquire()) {
@@ -387,7 +390,7 @@ namespace ZThread {
         ThreadImpl* impl = ThreadImpl::current();
         _threads.push_back(impl);
 
-        // Self cancel if too many threads are being created
+        // current cancel if too many threads are being created
         if(_threads.size() > _size) 
           impl->cancel();
 
@@ -495,7 +498,7 @@ namespace ZThread {
       }
 
       void cancel() {
-        return _taskQueue.cancel();
+        _taskQueue.cancel();
       }
 
       bool wait(unsigned long timeout) {
@@ -560,8 +563,8 @@ namespace ZThread {
     size(n);
     
     // Request cancelation when main() exits
-    ThreadQueue::instance()->insertShutdownTask(_shutdown);
 
+	ThreadImpl::current();
   }
 
   PoolExecutor::~PoolExecutor() { 

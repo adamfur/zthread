@@ -26,6 +26,7 @@
 #include "zthread/Guard.h"
 #include "FastLock.h"
 
+
 namespace ZThread {
 
   class ThreadImpl;
@@ -34,7 +35,7 @@ namespace ZThread {
    * @class ThreadQueue
    * @version 2.3.0
    * @author Eric Crahen <http://www.code-foo.com>
-   * @date <2003-07-16T20:07:52-0400>
+   * @date <2003-07-27T20:52:05-0400>
    *
    * A ThreadQueue accumulates references to user and reference threads.
    * These are threads that are running outside the scope of the Thread
@@ -124,9 +125,9 @@ namespace ZThread {
     void pollReferenceThreads();
 
   };
-
   
 
 } // namespace ZThread
+
 
 #endif  // __ZTTHREADQUEUE_H__

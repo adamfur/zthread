@@ -31,7 +31,7 @@ namespace ZThread {
   void ThreadLocalImpl::clearAll() {
 
     typedef ThreadImpl::ThreadLocalMap Map;
-    Map& m( ThreadImpl::current()->getThreadLocalMap() );
+    Map& m = ThreadImpl::current()->getThreadLocalMap();
     
     m.clear();
 
@@ -40,7 +40,7 @@ namespace ZThread {
   void ThreadLocalImpl::clear() const {
 
     typedef ThreadImpl::ThreadLocalMap Map;
-    Map& m( ThreadImpl::current()->getThreadLocalMap() );
+    Map& m = ThreadImpl::current()->getThreadLocalMap();
     
     Map::iterator i = m.find(this);
     if(i != m.end()) 
@@ -51,7 +51,7 @@ namespace ZThread {
   ThreadLocalImpl::ValuePtr ThreadLocalImpl::value( ValuePtr(*pfn)() ) const {
      
     typedef ThreadImpl::ThreadLocalMap Map;
-    Map& m( ThreadImpl::current()->getThreadLocalMap() );
+    Map& m = ThreadImpl::current()->getThreadLocalMap();
     
     Map::iterator i = m.find(this);
     if(i != m.end()) 
