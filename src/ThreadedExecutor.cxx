@@ -92,7 +92,7 @@ namespace ZThread {
         assert(!_list.empty());
 
         // Return w/o waiting if there are no executing tasks
-        if((size_t)std::for_each(_list.begin(), _list.end(), counter()) < 0)
+        if((size_t)std::for_each(_list.begin(), _list.end(), counter()) < 1)
           return true;
 
         // Update the waiter list for the active group 
