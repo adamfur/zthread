@@ -65,6 +65,7 @@ docs:
 	$(DOXYGEN) $(top_srcdir)/doc/zthread.doxygen; \
 	cp $(top_srcdir)/doc/documentation.html $(top_srcdir)/doc/html/index.html; \
 	cp $(top_srcdir)/doc/zthread.css $(top_srcdir)/doc/html/zthread.css; \
+	cp $(top_srcdir)/doc/bugs.js $(top_srcdir)/doc/html/bugs.js; \
 	else \
 	echo; \
 	echo "This configuration requires Doxygen, by Dimitri van Heesch."; \
