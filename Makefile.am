@@ -33,13 +33,8 @@ distclean-hook:
 
 ## include the doc & share directories in the distribution
 dist-hook: distclean-hook
-	cp -pR $(top_srcdir)/build $(distdir)
-	cp -pR $(top_srcdir)/build/VC6 $(distdir)
-	cp -pR $(top_srcdir)/build/VC7 $(distdir)
-	cp -pR $(top_srcdir)/build/DevC\+\+ $(distdir)
 	cp -pR $(top_srcdir)/doc $(distdir)
 	cp -pR $(top_srcdir)/share $(distdir)
-	cp -pR $(top_srcdir)/contrib $(distdir)
 	cp -pR $(top_srcdir)/include $(distdir)
 	cp -pR $(top_srcdir)/src/*.h $(distdir)/src
 	cp -pR $(top_srcdir)/src/posix $(distdir)/src
