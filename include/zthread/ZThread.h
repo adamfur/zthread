@@ -23,13 +23,11 @@
 #define __ZTLIBRARY_H__
 
 
-#include "zthread/AbstractThreadLocal.h"
 #include "zthread/Barrier.h"
 #include "zthread/BiasedReadWriteLock.h"
 #include "zthread/BlockingQueue.h"
 #include "zthread/BoundedQueue.h"
 #include "zthread/Cancelable.h"
-#include "zthread/CancelableTask.h"
 #include "zthread/ClassLockable.h"
 #include "zthread/ConcurrentExecutor.h"
 #include "zthread/Condition.h"
@@ -42,14 +40,11 @@
 #include "zthread/FastMutex.h"
 #include "zthread/FastRecursiveMutex.h"
 #include "zthread/Guard.h"
-#include "zthread/InheritableThreadLocal.h"
-#include "zthread/IntrusivePtr.h"
 #include "zthread/Lockable.h"
 #include "zthread/LockedQueue.h"
 #include "zthread/MonitoredQueue.h"
 #include "zthread/Mutex.h"
 #include "zthread/NonCopyable.h"
-#include "zthread/NullLockable.h"
 #include "zthread/PoolExecutor.h"
 #include "zthread/Priority.h"
 #include "zthread/PriorityCondition.h"

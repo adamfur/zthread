@@ -26,7 +26,7 @@
 #include "zthread/ThreadLocalImpl.h"
 #include "zthread/Thread.h"
 #include "zthread/Exceptions.h"
-#include "zthread/IntrusivePtr.h"
+#include "IntrusivePtr.h"
 
 #include "Monitor.h"
 #include "TSS.h"
@@ -41,7 +41,7 @@ namespace ZThread {
 /**
  * @class ThreadImpl
  * @author Eric Crahen <crahen@cse.buffalo.edu>
- * @date <2003-07-26T12:39:17-0400>
+ * @date <2003-07-27T13:39:03-0400>
  * @version 2.3.0
  */
 class ThreadImpl : public IntrusivePtr<ThreadImpl, FastLock>, public ThreadOps {
