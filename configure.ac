@@ -183,10 +183,6 @@ AC_ARG_ENABLE(macos,
 AC_ARG_ENABLE(vanilla,
 [  --enable-vanilla        Select vanilla implementation [default=autodetect]],
 [
-  if test $ZT_TYPE != auto; then
-     AC_MSG_ERROR(Select one implementation)
-  fi
-  ZT_TYPE="vanilla"
   COMPILER_OPTIONS="$COMPILER_OPTIONS -DZT_VANILLA"
 ])
 
