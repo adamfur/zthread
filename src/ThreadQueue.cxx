@@ -95,6 +95,13 @@ namespace ZThread {
       // the last pending user thread
       Guard<Monitor, CompoundScope<DeferredInterruptionScope, LockedScope> > g(m);
 
+      // Avoid race-condition where the last threads are done with thier tasks, but
+      // only begin the final part of the clean up phase after this destructor begins 
+      // to run. Takes advantage of the fact that if all remaining threads have transitioned
+      // into a pending state by the time execution reaches this point, then there is no
+      // need to wait.
+      waitRequired = waitRequired && !(_userThreads.empty() && !_pendingThreads.empty());
+
       // Reference threads can't be interrupted or otherwise 
       // manipulated. The only signal this monitor will recieve
       // at this point will be from the last pending thread.
@@ -129,7 +136,7 @@ namespace ZThread {
     // Wake the main thread,if its waiting, when the last pending-thread becomes available;
     // Otherwise, take note that no wait for pending threads to finish is needed
     if(_userThreads.empty())
-      if(_waiter && _waiter != (ThreadImpl*)1) 
+      if(_waiter && _waiter != (ThreadImpl*)1)
         _waiter->getMonitor().notify();
       else
         _waiter = (ThreadImpl*)!_waiter;
@@ -251,57 +258,5 @@ namespace ZThread {
     return removed;
 
   }
-
-  /*
-  void ThreadQueue::pollUserThreads() {
-
-    while(!_userThreads.empty()) {
-
-      // Make a local copy of the known user threads
-      ThreadList l;
-      std::copy(_userThreads.begin(), _userThreads.end(), std::back_inserter(l));
-
-      {
-
-        Guard<FastLock, UnlockedScope> g(_lock);
-        
-        // Cancel any remaining user threads
-        for(ThreadList::iterator i = l.begin(); i != l.end(); ++i) {
-
-          ThreadImpl* impl = *i;
-          Monitor& m(impl->getMonitor());
-          
-          if(m.tryAcquire()) {
-
-            impl->cancel(true);
-            m.release();
-
-          }
-
-        }
-
-        // Join the remaining threads
-        for(ThreadList::iterator i = l.begin(); i != l.end(); ++i) {
-
-          ThreadImpl* impl = *i;
-          ThreadOps::join(impl);
-          
-          // Update the reference count
-          impl->delReference();
-
-        }
-
-      }
-
-      // Erase the threads that have been joined.
-      for(ThreadList::iterator i = _userThreads.begin(); i != _userThreads.end();) 
-        if(std::find(l.begin(), l.end(), *i) != l.end())
-          i = _userThreads.erase(i);
-      
-      
-    }
-
-  }
-  */
 
 };
