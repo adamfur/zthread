@@ -25,25 +25,24 @@ uninstall-local:
 	-rm -rf $(datadir)/aclocal/pthread.m4
 	-rm -rf $(datadir)/aclocal/zthread.m4
 
-## clean out the build files
-distclean-hook:
-	find $(distdir)/* -type d -name autom4te.cache -print0 | xargs -0 rm -rf
-	find $(distdir)/* -type d -name \*CVS -print0 | xargs -0 rm -rf
-	find $(distdir)/* -type f -name \*~ -print0 | xargs -0 rm -rf
+dist-hook-clean: 
+	-rm -rf $(top_srcdir)/$(PACKAGE)-$(VERSION).tar.gz
 
 ## include the doc & share directories in the distribution
-dist-hook: distclean-hook
-	cp -pR $(top_srcdir)/doc $(distdir)
-	cp -pR $(top_srcdir)/share $(distdir)
-	cp -pR $(top_srcdir)/include $(distdir)
-	cp -pR $(top_srcdir)/src/*.h $(distdir)/src
-	cp -pR $(top_srcdir)/src/posix $(distdir)/src
-	cp -pR $(top_srcdir)/src/linux $(distdir)/src
-	cp -pR $(top_srcdir)/src/macos $(distdir)/src
-	cp -pR $(top_srcdir)/src/solaris $(distdir)/src
-	cp -pR $(top_srcdir)/src/win32 $(distdir)/src
-	cp -pR $(top_srcdir)/src/win9x $(distdir)/src
-	cp -pR $(top_srcdir)/src/vanilla $(distdir)/src
+dist-hook: dist-hook-clean
+	cp -pR $(top_srcdir)/doc     	$(distdir)
+	cp -pR $(top_srcdir)/share   	$(distdir)
+	cp -pR $(top_srcdir)/include   	$(distdir)
+	(find src -type d -name '[a-z,A-Z,0-9]*' -print0) | xargs -0 mkdir -p
+	(find src -type f -name \*h -print0 -o -name \*cxx -print0) | xargs -0 tar cf - | tar Cx $(distdir) 
+	find $(distdir)/doc     -type f -exec chmod --reference=README {} \;
+	find $(distdir)/include -type f -exec chmod --reference=README {} \;
+	find $(distdir)/src     -type f -exec chmod --reference=README {} \;
+	find $(distdir)/        -type d -exec chmod a+rx {} \;
+	find $(distdir)/ -type f -name \*~ -print0 | xargs -0 rm -rf
+	find $(distdir)/ -type f -name \*.bak -print0 | xargs -0 rm -rf
+	find $(distdir)/ -type f -name \*.log -print0 | xargs -0 rm -rf
+	find $(distdir)/ -type f -name \*.obj -print0 | xargs -0 rm -rf
 
 ## RPM from the distribution rule
 rpm: dist
