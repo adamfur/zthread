@@ -32,7 +32,7 @@ namespace ZThread {
   /**
    * @class FastMutex
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-16T19:32:49-0400>
+   * @date <2003-07-19T18:31:09-0400>
    * @version 2.2.0
    *
    * A FastMutex is a small fast implementation of a non-recursive, mutually exclusive
@@ -40,8 +40,8 @@ namespace ZThread {
    * as it involved the least overhead. However, this slight increase in speed is 
    * gained by sacrificing the robustness provided by the other classes. 
    *
-   * Typically, a FastMutex is implemented using a spin lock. It should be reserved 
-   * for synchronizing short sections of code.
+   * A FastMutex has the useful property of not being interruptable; that is to say  
+   * that acquire() and tryAcquire() will not throw Interrupted_Exceptions.
    *
    * @see Mutex
    *
@@ -67,8 +67,10 @@ namespace ZThread {
   
     /**
      * Acquire exclusive access. No safety or state checks are performed.
-     *
+     * 
      * @pre the caller should <i>not</i> have previously acquired this lock
+     *
+     * @exception Interrupted_Exception never thrown
      */
     virtual void acquire();
   
@@ -89,6 +91,8 @@ namespace ZThread {
      * - <em>false</em> if the lock was acquired
      *
      * @pre the caller should <i>not</i> have previously acquired this lock
+     *
+     * @exception Interrupted_Exception never thrown
      */
     virtual bool tryAcquire(unsigned long timeout);
   
