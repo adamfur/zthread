@@ -32,10 +32,10 @@ namespace ZThread {
   class ThreadImpl;
   
   /**
-   * @class Thread
+   * @class Task
    *
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-08T09:52:13-0400>
+   * @date <2003-07-08T09:53:26-0400>
    * @version 2.3.0
    *
    */
@@ -67,7 +67,7 @@ namespace ZThread {
    * @class Thread
    *
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-08T09:52:13-0400>
+   * @date <2003-07-08T09:53:26-0400>
    * @version 2.3.0
    *
    */
