@@ -132,7 +132,7 @@ bool Monitor::interrupt() {
 
     wasInterruptable = false;
 
-    if(hadWaiter) {
+    if(hadWaiter && !masked(Monitor::INTERRUPTED)) {
 
       // Blocked on a synchronization object
       if(::SetEvent(_handle) == FALSE) {
@@ -210,7 +210,7 @@ bool Monitor::cancel() {
     push(INTERRUPTED);
     
     // If there is a waiter then send the signal.
-    if(hadWaiter) 
+    if(hadWaiter && !masked(Monitor::INTERRUPTED)) 
       if(::SetEvent(_handle) == FALSE) {
         assert(0);
       }

@@ -78,7 +78,7 @@ namespace ZThread {
 
       // Execute the shutdown tasks
       for(TaskList::iterator i = shutdownTasks.begin(); i != shutdownTasks.end(); ++i) {
-        try { ZTDEBUG("BY ME\n");
+        try { 
           (*i)->run();
         } catch(...) { }
       }

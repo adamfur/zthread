@@ -107,7 +107,7 @@ namespace ZThread {
         m.acquire();
         
         {
-          
+
           Guard<Lockable, UnlockedScope> g2(g1);          
           state = timeout == 0 ? m.wait() : m.wait(timeout);
 
@@ -193,9 +193,9 @@ namespace ZThread {
        * @post At least 1 empty group exists
        */
       void decrement(size_t n) {
-
+       
         Guard<Mutex> g1(_lock);
-
+       
         // At least 1 non-empty group exists
         assert((size_t)std::for_each(_list.begin(), _list.end(), counter()) > 0);
 
@@ -211,7 +211,7 @@ namespace ZThread {
 
         // Decrease the count for tasks in this group,
         if(--i->count == 0 && i == _list.begin()) {
-          
+       
           do { 
 
             // When the first group completes, wake all waiters for every
@@ -348,7 +348,7 @@ namespace ZThread {
         try {
 
           _task->run();
-          
+
         } catch(...) {
 
         }
@@ -431,7 +431,7 @@ namespace ZThread {
         // from an older generation
         for(ThreadList::iterator i = _threads.begin(); i != _threads.end(); ++i)
           (*i)->interrupt();
-        
+       
       }
 
       //! Adjust the number of desired workers and return the number of Threads needed

@@ -157,9 +157,8 @@ bool Monitor::interrupt() {
 
     wasInterruptable = false;
     
-    if(hadWaiter) 
+    if(hadWaiter && !masked(Monitor::INTERRUPTED))
       pthread_cond_signal(&_waitCond);
-    
     else
       wasInterruptable = !pthread_equal(_owner, pthread_self());
 
@@ -218,7 +217,7 @@ bool Monitor::cancel() {
     // Update the state & wake the waiter if there is one
     push(INTERRUPTED);
     
-    if(hadWaiter) 
+    if(hadWaiter && !masked(Monitor::INTERRUPTED))
       pthread_cond_signal(&_waitCond);
     
   }

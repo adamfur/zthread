@@ -165,7 +165,7 @@ bool Monitor::interrupt() {
 
   _waitLock.release();
 
-  if(hasWaiter)
+  if(hasWaiter && !masked(Monitor::INTERRUPTED))
     MPSignalSemaphore(_sema);
 
   return wasInterruptable;
@@ -245,7 +245,7 @@ bool Monitor::cancel() {
   
   _waitLock.release();
   
-  if(hasWaiter)
+  if(hasWaiter && !masked(Monitor::INTERRUPTED))
     MPSignalSemaphore(_sema);
 
   return wasInterrupted;

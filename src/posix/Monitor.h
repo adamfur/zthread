@@ -30,7 +30,7 @@ namespace ZThread {
 /**
  * @class Monitor
  * @author Eric Crahen <crahen@cse.buffalo.edu>
- * @date <2003-07-16T23:29:48-0400>
+ * @date <2003-07-18T08:16:09-0400>
  * @version 2.2.8
  */
 class Monitor : public Status, private NonCopyable {
@@ -75,7 +75,7 @@ class Monitor : public Status, private NonCopyable {
   inline void release() {
     _lock.release();
   }
-  
+
   /**
    * Wait for a state change and atomically unlock the external lock.
    * Blocks for an indefinent amount of time. 

@@ -32,7 +32,7 @@ namespace ZThread {
 /**
  * @class ConditionImpl
  * @author Eric Crahen <crahen@cse.buffalo.edu>
- * @date <2003-07-16T19:52:42-0400>
+ * @date <2003-07-18T08:15:37-0400>
  * @version 2.2.11
  *
  * The ConditionImpl template allows how waiter lists are sorted
@@ -251,7 +251,7 @@ void ConditionImpl<List>::wait() {
     // Defer interruption until the external lock is acquire()d
     Guard<Monitor, DeferredInterruptionScope> g3(m);
     {
-    
+
 #if !defined(NDEBUG)
       try {
 #endif
@@ -340,7 +340,7 @@ bool ConditionImpl<List>::wait(unsigned long timeout) {
     // Defer interruption until the external lock is acquire()d
     Guard<Monitor, DeferredInterruptionScope> g3(m);
     {
-    
+
 #if !defined(NDEBUG)
       try {
 #endif
