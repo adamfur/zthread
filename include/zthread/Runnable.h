@@ -29,8 +29,8 @@ namespace ZThread {
 /**
  * @class Runnable
  * 
- * @author Eric Crahen <crahen at code-foo dot com>
- * @date <2002-12-21T04:31:53-0500>
+ * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @date <2003-07-07T19:52:38-0400>
  * @version 2.2.11
  *
  * Encapsulates a Runnable task.
@@ -41,12 +41,12 @@ class Runnable {
   /**
    * Runnables should never throw in thier destructors
    */
-	  virtual ~Runnable() throw() { }
+  virtual ~Runnable() { }
 
   /**
    * Task to be performed in another thread of execution
    */
-  virtual void run() throw() = 0;
+  virtual void run() = 0;
 
 };
  

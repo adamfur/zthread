@@ -6,36 +6,42 @@
 using namespace ZThread;
 using namespace std;
 
-class Task : public Runnable {
+class Launch : public Runnable {
 
   int countDown;
 
 public:
 
-  Task(int n) : countDown(n) {}
+  Launch(int n) : countDown(n) {}
 
-  virtual ~Task() throw() {}
+  virtual ~Launch() throw() {}
 
-  virtual void run() throw() {
-
+  virtual void run() {
+    try {
+    
+  Thread::sleep(2000);
     while(countDown--) 
       cout << countDown << endl;
 
     cout << "Liftoff!" << endl;
-
+} catch(Synchronization_Exception& e) {
+  cout << e.what() << endl;
+}
+    cout << "DONE!" << endl;
   }
 
 };
 
 int main() {
-
-  Thread t;
   
   try {
-    t.run(new Task(10));
-    t.join();
+  
+    Thread(new Launch(10));
+
   } catch(Synchronization_Exception& e) {
     cerr << e.what() << endl;
   }
-
+  
+  cout << " !exit! " << endl;
+  
 } ///:~

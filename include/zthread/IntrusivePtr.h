@@ -26,13 +26,14 @@
 #define __ZTINTRUSIVEPTR_H__
 
 #include "zthread/Guard.h"
+#include <cstdlib>
 
 namespace ZThread {
 
 /**
  * @class IntrusivePtr
- * @author Eric Crahen <zthread@code-foo.com>
- * @date <2002-05-29T16:01:59-0400>
+ * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @date <2003-07-07T13:17:14-0400>
  * @version 2.2.0
  *
  * This template creates an intrusively reference counted object
@@ -40,11 +41,11 @@ namespace ZThread {
  * added and removed. When the reference count drops to 0, the 
  * IntrusivePtr will delete itself. 
  */
-template <typename T, class LockType, int InitialCount=1>
+template <typename T, class LockType>
 class IntrusivePtr : NonCopyable {
   
   //! Intrusive reference count
-  unsigned int _count;
+  size_t _count;
   
   //! Synchornization object
   LockType _lock;
@@ -54,7 +55,7 @@ public:
   /**
    * Create an IntrusivePtr with a count.
    */
-  IntrusivePtr() : _count(InitialCount) { }
+  IntrusivePtr(size_t InitialCount=1) : _count(InitialCount) { }
   
   /**
    * Destry an IntrusivePtr
@@ -65,7 +66,7 @@ public:
    * Add a reference to this object, it will take one more
    * call to delReference() for it to be deleted.
    */
-  inline void addReference() {
+  void addReference() {
 
     Guard<LockType, LockedScope> g(_lock);
     _count++;  
@@ -76,7 +77,7 @@ public:
    * Remove a reference from this object, if the reference count
    * drops to 0 as a result, the object deletes itself.
    */
-  inline void delReference() {
+  void delReference() {
 
     bool result = false;
 

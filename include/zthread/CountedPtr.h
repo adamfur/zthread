@@ -22,101 +22,213 @@
 #ifndef __ZTCOUNTEDPTR_H__
 #define __ZTCOUNTEDPTR_H__
 
+#include <algorithm>
+#include <cassert>
+
 #include "zthread/AtomicCount.h"
-#include "zthread/Guard.h"
 
 namespace ZThread {
   
-/**
- * @class CountedPtr
- *
- * @author Eric Crahen <crahen at code-foo dot com>
- * @date <2002-12-21T13:28:50-0500>
- * @version 2.2.5
- *
- * Thread-safe wrapper to implement a counted reference, this
- * is limited in order to keep the lock allocated on the heap and
- * to keep it from causing trouble with static destructors. This
- * is immutable in the sense that it reassignment is not allowed.
- * A CountedPtr will always refer to the same object.
- */
-template <class T>
-class CountedPtr {
-
-  CountedPtr& operator=(const CountedPtr& ptr);
-
-  AtomicCount* _count;
-
- protected:
-
-  T*  _instance;
-
- public:
-
-  //! Create a CountedPtr
-  CountedPtr() : _count(new AtomicCount) {
-    
-    _instance = new T;
-    
-  };
-
-  //! Create a CountedPtr
-  explicit CountedPtr(T* ptr) : _count(new AtomicCount) {
-    
-    _instance = ptr;
-    
-  };
-  
-  //! Create a CountedPtr
-  CountedPtr(const CountedPtr& ptr) {
-    
-    ptr._count->increment();
-
-    _instance  = ptr._instance;
-    _count = ptr._count;
-    
-  }
-  
   /**
-   * Destroy the CountedPtr and check for release of the implementation
+   * @class CountedPtr
+   *
+   * @author Eric Crahen <crahen@cse.buffalo.edu>
+   * @date <2003-07-07T21:54:58-0400>
+   * @version 2.3.0
+   *
    */
-  virtual ~CountedPtr() throw();
+  template <typename T, typename CountT = AtomicCount>
+    class CountedPtr {
+
+      template <typename U, typename V> friend class CountedPtr;
+
+      CountT* _count;
+      T*  _instance;
+
+      public:
+
+      CountedPtr() : _count(new CountT()), _instance(0) { }
+
+      explicit CountedPtr(T* raw) : _count(new CountT()), _instance(raw) {
+        (*_count)++;
+      }
+
+      template <typename U>
+      explicit CountedPtr(U* raw) : _count(new CountT()), _instance(raw) {
+        (*_count)++;
+      }
+
+      CountedPtr(const CountedPtr& ptr) : _count(ptr._count), _instance(ptr._instance) {
+
+        if(_count)
+        (*_count)++;
+
+      }
+
+      template <typename U, typename V>
+      CountedPtr(const CountedPtr<U, V>& ptr) : _count(ptr._count), _instance(ptr._instance) {
+
+        if(_count)
+        (*_count)++;
+
+      }
+
+      ~CountedPtr() {
+
+        if(_count && --(*_count) == 0) {
+   
+          if(_instance) 
+          delete _instance;
+
+          delete _count;
+      
+        }
+
+      }
   
-  /**
-   * Get a reference to the underlying implementation
-   */
-  T* operator->() throw();
+      const CountedPtr& operator=(const CountedPtr& ptr) {
+    
+        typedef CountedPtr<T, CountT> this_type;
+
+        this_type(ptr).swap(*this);
+        return *this;
+
+      } 
+
+      template <typename U, typename V>
+      const CountedPtr& operator=(const CountedPtr<U, V>& ptr) {
+    
+        typedef CountedPtr<T, CountT> this_type;
+
+        this_type(ptr).swap(*this);
+        return *this;
+
+      } 
+
+      void reset() {
+
+        typedef CountedPtr<T, CountT> this_type;
+        this_type().swap(*this);
+
+      }
+
+      void swap(CountedPtr& ptr) {
+
+        if(ptr._count != _count) {
+
+          std::swap(_count, ptr._count);
+          std::swap(_instance, ptr._instance);
+
+        }
+
+      }
   
-  /**
-   * Get a reference to the underlying implementation
-   */
-  const T* operator->() const throw();
+      template <typename U, typename V>
+      void swap(CountedPtr<U, V>& ptr) {
+
+        if(ptr._count != _count) {
+
+          std::swap(_count, ptr._count);
+          std::swap(_instance, ptr._instance);
+
+        }
+
+      }
+
+      // Convience operators
+
+      bool less(const CountedPtr& ptr) const {
+        return _instance < ptr._instance;
+      }
+
+      template <typename U, typename V>
+      bool less(const CountedPtr<U, V>& ptr) const {
+        return _instance < ptr._instance;
+      }
+
+      bool equal(const CountedPtr& ptr) const {
+        return _count == ptr._count;
+      }
+
+      template <typename U, typename V>
+      bool equal(const CountedPtr<U, V>& ptr) const {
+        return _count == ptr._count;
+      }
+
+
+      friend inline bool operator==(const CountedPtr& lhs, const CountedPtr& rhs) {
+        return lhs.equal(rhs);
+      }
+
+      friend inline bool operator<(const CountedPtr& lhs, const CountedPtr& rhs) {
+        return lhs.less(rhs);
+      }
+
+
+      T& operator*() {
+        assert(_instance != 0);
+        return *_instance;
+      }
+
+      T* operator->() {
+        assert(_instance != 0);
+        return _instance;
+      }
+
+      const T* operator->() const {
+        assert(_instance != 0);
+        return _instance;
+      }
  
-  
-}; 
+      bool operator!() const {
+        return _instance == 0;
+      }
 
-template <class T>
-CountedPtr<T>::~CountedPtr() throw() {
+      operator bool() const {
+        return _instance != 0;
+      }
+      
+    }; /* CountedPtr */
 
-  if(_count->decrement()) {
-    
-    delete _instance;
-    delete _count;
-    
+  template<typename U, typename V, typename X, typename Y> 
+    inline bool operator<(CountedPtr<U, V> const &lhs, CountedPtr<X, Y> const &rhs) {
+    return lhs.less(rhs);
   }
-  
-};
 
+  template<typename U, typename V, typename X, typename Y> 
+    inline bool operator==(CountedPtr<U, V> const &lhs, CountedPtr<X, Y> const &rhs) {
+    return lhs.equal(rhs.get);
+  }
 
-template <class T>
-T* CountedPtr<T>::operator->() throw() { 
-  return _instance; 
-}
+  template<typename U, typename V, typename X, typename Y> 
+    inline bool operator!=(CountedPtr<U, V> const &lhs, CountedPtr<X, Y> const &rhs) {
+    return !(lhs.equal(rhs.get));
+  }
 
-template <class T>
-const T* CountedPtr<T>::operator->() const throw() { 
-  return _instance; 
-}
+  template<typename U, typename V, typename X, typename Y> 
+    inline void swap(CountedPtr<U, V> const &lhs, CountedPtr<X, Y> const &rhs) {
+    lhs.swap(rhs);
+  }
+
+  template<typename U, typename V>
+    inline bool operator<(CountedPtr<U, V> const &lhs, CountedPtr<U, V> const &rhs) {
+    return lhs.less(rhs);
+  }
+
+  template<typename U, typename V> 
+    inline bool operator==(CountedPtr<U, V> const &lhs, CountedPtr<U, V> const &rhs) {
+    return lhs.equal(rhs.get);
+  }
+
+  template<typename U, typename V> 
+    inline bool operator!=(CountedPtr<U, V> const &lhs, CountedPtr<U, V> const &rhs) {
+    return !(lhs.equal(rhs.get));
+  }
+
+  template<typename U, typename V> 
+    inline void swap(CountedPtr<U, V> const &lhs, CountedPtr<U, V> const &rhs) {
+    lhs.swap(rhs);
+  }
 
 } // namespace ZThread
 

@@ -29,6 +29,7 @@
 #include "config.h"
 #endif
 
+/*
 // Select the correct AtomicCount implementation based on
 // what the complilation environment has defined
 
@@ -44,5 +45,8 @@
 #ifndef __ZTATOMICCOUNTIMPL_H__
 #  include "vanilla/SimpleAtomicCount.cxx"
 #endif
+*/
+
+#  include "vanilla/SimpleAtomicCount.cxx"
 
 #endif // __ZTATOMICCOUNTSELECT_H__

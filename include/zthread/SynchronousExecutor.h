@@ -28,135 +28,114 @@
 
 namespace ZThread {
 
-
-/**
- * @class SynchronousExecutor
- *
- * @author Eric Crahen <zthread@code-foo.com>
- * @date <2002-06-29T07:57:31-0700>
- * @version 2.2.2
- *
- * A SynchronousExecutor runs tasks in the current thread, but 
- * allows only one thread to do so at any given time.
- *
- * Submitting a NullTask will allow you to wait() for all real tasks 
- * being executed to complete; and not just to be serviced (started).
- *
- * @see Executor.
- */
-template <class LockType>
-class SynchronousExecutor : public Executor {
-  
-  //! Serialize access
-  LockType _lock;
-
-  //! Cancellation flag
-  bool _canceled;
-
-  public:
-
-  //! Create a new SynchronousExecutor
-  SynchronousExecutor() : _canceled(false) {}
-
-
-  //! Destroy a SynchronousExecutor
-  virtual ~SynchronousExecutor() throw() {}
-
   /**
-   * Submit a light wieght task to an Executor. This will not
-   * block the calling thread very long. The submitted task will
-   * be executed at some later point by another thread.
-   * 
-   * @exception Cancellation_Exception thrown if a task is submited when 
-   * the executor has been canceled.
-   * @exception Synchronization_Exception thrown is some other error occurs.
+   * @class SynchronousExecutor
    *
-   * @see Executor::execute(RunnableHandle&)
-   */
-  virtual void execute(const RunnableHandle& task)
-    /* throw(Synchronization_Exception) */ {
-
-    
-    // Canceled Executors will not accept new tasks, quick 
-    // check to avoid excessive locking in the canceled state
-    if(_canceled) 
-      throw Cancellation_Exception();
-
-    Guard<LockType> g(_lock);
-
-    if(_canceled) // Double check
-      throw Cancellation_Exception();
-
-    // Run and destroy the task.
-    RunnableHandle local(task);
-    local->run();
-
-  }
-  
-  /**
-   * Convience method
+   * @author Eric Crahen <crahen@cse.buffalo.edu>
+   * @date <2003-07-07T22:01:44-0400>
+   * @version 2.3.0
    *
-   * @see Executor::execute(const RunnableHandle&)
+   * A SynchronousExecutor runs tasks in the current thread, but 
+   * allows only one thread to do so at any given time.
+   *
+   * Submitting a NullTask will allow you to wait() for all real tasks 
+   * being executed to complete; and not just to be serviced (started).
+   *
+   * @see Executor.
    */
-  void execute(Runnable* task)
-    /* throw(Synchronization_Exception) */ {
+  template <class LockType>
+    class SynchronousExecutor : public Executor {
+  
+    //! Serialize access
+    LockType _lock;
 
-    execute( RunnablePtr(task) );
+    //! Cancellation flag
+    bool _canceled;
 
-  }
+    public:
+
+    //! Create a new SynchronousExecutor
+    SynchronousExecutor() : _canceled(false) {}
 
 
-  /**
-   * @see Executor::cancel()
-   */
-  virtual void cancel() 
-    /* throw(Synchronization_Exception) */ {
+    //! Destroy a SynchronousExecutor
+    virtual ~SynchronousExecutor() {}
+
+    /**
+     * Submit a light wieght task to an Executor. This will not
+     * block the calling thread very long. The submitted task will
+     * be executed at some later point by another thread.
+     * 
+     * @exception Cancellation_Exception thrown if a task is submited when 
+     * the executor has been canceled.
+     * @exception Synchronization_Exception thrown is some other error occurs.
+     *
+     * @see Executor::execute(RunnableHandle&)
+     */
+    virtual void execute(const Task& task) {
+          
+      // Canceled Executors will not accept new tasks, quick 
+      // check to avoid excessive locking in the canceled state
+      if(_canceled) 
+        throw Cancellation_Exception();
+
+      Guard<LockType> g(_lock);
+
+      if(_canceled) // Double check
+        throw Cancellation_Exception();
+
+      // Run the task.
+      task->run();
+
+    }  
+
+    /**
+     * @see Executor::cancel()
+     */
+    virtual void cancel() {
       
-    Guard<LockType> g(_lock);
-    _canceled = true;
+      Guard<LockType> g(_lock);
+      _canceled = true;
     
-  }
+    }
   
-  /**
-   * @see Executor::isCanceled()
-   */
-  virtual bool isCanceled()
-    /* throw(Synchronization_Exception) */ {
+    /**
+     * @see Executor::isCanceled()
+     */
+    virtual bool isCanceled() {
     
-    Guard<LockType> g(_lock);
-    return _canceled;
+      Guard<LockType> g(_lock);
+      return _canceled;
 
-  }
+    }
  
-  /**
-   * @see Executor::wait()
-   */
-  virtual void wait() 
-    /* throw(Synchronization_Exception) */ { 
+    /**
+     * @see Executor::wait()
+     */
+    virtual void wait() {
 
-    if(Thread::interrupted())
-      throw Interrupted_Exception();
+      if(Thread::interrupted())
+        throw Interrupted_Exception();
     
-    Guard<LockType> g(_lock);
+      Guard<LockType> g(_lock);
 
-  }
+    }
 
-  /**
-   * @see Executor::wait(unsigned long)
-   */
-  virtual bool wait(unsigned long) 
-    /* throw(Synchronization_Exception) */ { 
+    /**
+     * @see Executor::wait(unsigned long)
+     */
+    virtual bool wait(unsigned long) {
 
-    if(Thread::interrupted())
-      throw Interrupted_Exception();
+      if(Thread::interrupted())
+        throw Interrupted_Exception();
 
-    Guard<LockType> g(_lock);
-    return true;
+      Guard<LockType> g(_lock);
+      return true;
 
-  }
+    }
 
 
-};
+  }; /* SynchronousExecutor */
 
 } // namespace ZThread
 

@@ -30,385 +30,363 @@
 
 namespace ZThread {
 
-/**
- * @class BoundedQueue
- *
- * @author Eric Crahen <zthread@code-foo.com>
- * @date <2002-07-15T10:01:28-0400>
- * @version 2.2.0
- *
- * A BoundedQueues is a Queue implementation that provides  serialized access to the 
- * items added to it. It addition, a BoundedQueues will block threads calling 
- * empty() methods until the Queue becomes empty. Similarly, threads calling the 
- * next() methods will be blocked until items arrive. Finally, threads calling the
- * the add() methods will be blocked if the Queue is at capacity.
- */
-template <class T, class LockType, typename StorageType=std::deque<T> >
-class BoundedQueue : public Queue<T> {
-
-  //! Maximum capacity for the Queue
-  unsigned int _capacity;
-
-  //! Serialize access
-  LockType _lock;
-
-  //! Signaled if not full
-  Condition _notFull;
-
-  //! Signaled if not empty
-  Condition _notEmpty;
-
-  //! Signaled if empty
-  Condition _isEmpty;
-
-  //! Storage backing the queue
-  StorageType _queue;
-
-  //! Cancellation flag
-  volatile bool _canceled;
-
-  public:
-
   /**
-   * Create a new Queue with the given capacity. This 
-   * capacity can not be altered once the Queue is created.
-   * 
-   * @param int capacity
+   * @class BoundedQueue
+   *
+   * @author Eric Crahen <crahen@cse.buffalo.edu>
+   * @date <2003-07-07T22:11:40-0400>
+   * @version 2.3.0
+   *
+   * A BoundedQueues is a Queue implementation that provides  serialized access to the 
+   * items added to it. It addition, a BoundedQueues will block threads calling 
+   * empty() methods until the Queue becomes empty. Similarly, threads calling the 
+   * next() methods will be blocked until items arrive. Finally, threads calling the
+   * the add() methods will be blocked if the Queue is at capacity.
    */
-  BoundedQueue(unsigned int capacity)
-    : _notFull(_lock), _notEmpty(_lock), _isEmpty(_lock), _capacity(capacity), _canceled(false) {}
+  template <class T, class LockType, typename StorageType=std::deque<T> >
+    class BoundedQueue : public Queue<T> {
+
+      //! Maximum capacity for the Queue
+      unsigned int _capacity;
+
+      //! Serialize access
+      LockType _lock;
+
+      //! Signaled if not full
+      Condition _notFull;
+
+      //! Signaled if not empty
+      Condition _notEmpty;
+
+      //! Signaled if empty
+      Condition _isEmpty;
+
+      //! Storage backing the queue
+      StorageType _queue;
+
+      //! Cancellation flag
+      volatile bool _canceled;
+
+      public:
+
+      /**
+       * Create a new Queue with the given capacity. This 
+       * capacity can not be altered once the Queue is created.
+       * 
+       * @param int capacity
+       */
+      BoundedQueue(unsigned int capacity)
+        : _notFull(_lock), _notEmpty(_lock), _isEmpty(_lock), 
+          _capacity(capacity), _canceled(false) {}
   
-  //! Destroy this Queueand any remaining items 
-  virtual ~BoundedQueue() throw() {
+      //! Destroy this Queueand any remaining items 
+      virtual ~BoundedQueue() { }
     
-    for(typename StorageType::iterator i = _queue.begin(); _queue.size() > 0;) {
+      /**
+       * Get the capacity of this Queue. When the Queue is at capacity
+       * the add() methods will block.
+       *
+       * @return unsigned int capacity
+       */
+      unsigned int capacity() { 
+        return _capacity; 
+      }
 
-      delete *i;
-      i = _queue.erase(i);
+      /**
+       * Add an object to this Queue, tranfering the ownership of that
+       * object to the Queue. As the new owner, the Queue becomes responsible 
+       * for deleting the add()ed object. 
+       *
+       * This method may block the caller for an indefinite amount
+       * of time if the Queue is at capacity.
+       *
+       * @param item - object to attempt to add to this Queue
+       * 
+       * @see Queue::add(T)
+       *
+       * @post if the Queue was empty, threads blocked by a next() method will 
+       * be awakend if no exception is thrown
+       */
+      virtual void add(T item) {
 
-    }
-
-
-  }
-
-  /**
-   * Get the capacity of this Queue. When the Queue is at capacity
-   * the add() methods will block.
-   *
-   * @return unsigned int capacity
-   */
-  unsigned int capacity() { 
-    return _capacity; 
-  }
-
-  /**
-   * Add an object to this Queue, tranfering the ownership of that
-   * object to the Queue. As the new owner, the Queue becomes responsible 
-   * for deleting the add()ed object. 
-   *
-   * This method may block the caller for an indefinite amount
-   * of time if the Queue is at capacity.
-   *
-   * @param item - object to attempt to add to this Queue
-   * 
-   * @see Queue::add(T)
-   *
-   * @post if the Queue was empty, threads blocked by a next() method will 
-   * be awakend if no exception is thrown
-   */
-  virtual void add(T item) 
-    /* throw(Synchronization_Exception) */{
-
-    Guard<LockType> g(_lock);
+        Guard<LockType> g(_lock);
       
-    // Wait for the capacity of the Queue to drop 
-    while ((_queue.size() == _capacity) && !_canceled)
-      _notFull.wait();
+        // Wait for the capacity of the Queue to drop 
+        while ((_queue.size() == _capacity) && !_canceled)
+          _notFull.wait();
       
-    if(_canceled)
-      throw Cancellation_Exception();
+        if(_canceled)
+          throw Cancellation_Exception();
 
-    _queue.push_back(item);
-    _notEmpty.signal(); // Wake any waiters
+        _queue.push_back(item);
+        _notEmpty.signal(); // Wake any waiters
       
     
-  }
+      }
     
-  /**
-   * Add an object to this Queue, tranfering the ownership of that
-   * object to the Queue. As the new owner, the Queue becomes responsible 
-   * for deleting the add()ed object. 
-   *
-   * This method may block the caller for an indefinite amount
-   * of time if the Queue is at capacity.
-   *
-   * @param item - object to attempt to add to this Queue
-   * @param timeout - maximum amount of time (milliseconds) this method could block
-   * 
-   * @return true if the item was add()ed before the given timeout expired. Otherwise
-   * false
-   *
-   * @see Queue::add(T, unsigned long)
-   *
-   * @post if the Queue was empty, threads blocked by a next() method will 
-   * be awakend if no exception is thrown
-   */
-  virtual bool add(T item, unsigned long timeout) 
-    /* throw(Synchronization_Exception) */ {
+      /**
+       * Add an object to this Queue, tranfering the ownership of that
+       * object to the Queue. As the new owner, the Queue becomes responsible 
+       * for deleting the add()ed object. 
+       *
+       * This method may block the caller for an indefinite amount
+       * of time if the Queue is at capacity.
+       *
+       * @param item - object to attempt to add to this Queue
+       * @param timeout - maximum amount of time (milliseconds) this method could block
+       * 
+       * @return true if the item was add()ed before the given timeout expired. Otherwise
+       * false
+       *
+       * @see Queue::add(T, unsigned long)
+       *
+       * @post if the Queue was empty, threads blocked by a next() method will 
+       * be awakend if no exception is thrown
+       */
+      virtual bool add(T item, unsigned long timeout) {
+    
+        try {
 
-    try {
-
-      Guard<LockType> g(_lock, timeout);
+          Guard<LockType> g(_lock, timeout);
       
-      // Wait for the capacity of the Queue to drop 
-      while ((_queue.size() == _capacity) && !_canceled)
-        if(!_notFull.wait(timeout))
-          return false;
+          // Wait for the capacity of the Queue to drop 
+          while ((_queue.size() == _capacity) && !_canceled)
+            if(!_notFull.wait(timeout))
+              return false;
       
-      if(_canceled)
-        throw Cancellation_Exception();
+          if(_canceled)
+            throw Cancellation_Exception();
       
-      _queue.push_back(item);
-      _notEmpty.signal(); // Wake any waiters
+          _queue.push_back(item);
+          _notEmpty.signal(); // Wake any waiters
       
-    } catch(TimeOut_Exception&) { return false; }
+        } catch(TimeOut_Exception&) { return false; }
     
-    return true;
+        return true;
 
-  }
+      }
 
 
-  /**
-   * Get an object from this Queue. 
-   *
-   * This method will block the calling thread until an item
-   * arrives in the Queue or until an exception is thrown.
-   *
-   * @return T next available object
-   * 
-   * @see Queue::next()
-   *
-   * @exception Cancellation_Exception thrown if there are no items available 
-   * in the Queue and the Queue has become cancel()ed
-   *
-   * @post if the Queue becomes empty as a result of this method, threads 
-   * blocked by an empty() or size() method will be awakend.
-   */
-  virtual T next() 
-    /* throw(Synchronization_Exception) */ {
+      /**
+       * Get an object from this Queue. 
+       *
+       * This method will block the calling thread until an item
+       * arrives in the Queue or until an exception is thrown.
+       *
+       * @return T next available object
+       * 
+       * @see Queue::next()
+       *
+       * @exception Cancellation_Exception thrown if there are no items available 
+       * in the Queue and the Queue has become cancel()ed
+       *
+       * @post if the Queue becomes empty as a result of this method, threads 
+       * blocked by an empty() or size() method will be awakend.
+       */
+      virtual T next() {
     
-    Guard<LockType> g(_lock);
+        Guard<LockType> g(_lock);
       
-    while ( _queue.size() == 0 && !_canceled)
-      _notEmpty.wait();
+        while ( _queue.size() == 0 && !_canceled)
+          _notEmpty.wait();
     
-    if( _queue.size() == 0) // Queue canceled
-      throw Cancellation_Exception();  
+        if( _queue.size() == 0) // Queue canceled
+          throw Cancellation_Exception();  
 
-    T item = _queue.front();
-    _queue.pop_front();
+        T item = _queue.front();
+        _queue.pop_front();
       
-    _notFull.signal(); // Wake any thread trying to add
+        _notFull.signal(); // Wake any thread trying to add
 
-    if(_queue.size() == 0) // Wake empty waiters
-      _isEmpty.broadcast();
+        if(_queue.size() == 0) // Wake empty waiters
+          _isEmpty.broadcast();
 
-    return item;
+        return item;
 
-  }
+      }
 
-  /**
-   * Get an object from this Queue. 
-   *
-   * This method will block the calling thread until an item
-   * arrives in the Queue or until an exception is thrown.
-   *
-   * @param timeout - maximum amount of time (milliseconds) this method could block
-   * @return T next available object
-   * 
-   * @see Queue::next(unsigned long)
-   *
-   * @exception Cancellation_Exception thrown if there are no items available 
-   * in the Queue and the Queue has become cancel()ed
-   *
-   * @post if the Queue becomes empty as a result of this method, threads 
-   * blocked by an empty() method will be awakend.
-   */
-  virtual T next(unsigned long timeout)
-    /* throw(Synchronization_Exception) */ {
-
-    Guard<LockType> g(_lock, timeout);
+      /**
+       * Get an object from this Queue. 
+       *
+       * This method will block the calling thread until an item
+       * arrives in the Queue or until an exception is thrown.
+       *
+       * @param timeout - maximum amount of time (milliseconds) this method could block
+       * @return T next available object
+       * 
+       * @see Queue::next(unsigned long)
+       *
+       * @exception Cancellation_Exception thrown if there are no items available 
+       * in the Queue and the Queue has become cancel()ed
+       *
+       * @post if the Queue becomes empty as a result of this method, threads 
+       * blocked by an empty() method will be awakend.
+       */
+      virtual T next(unsigned long timeout) {
+      
+        Guard<LockType> g(_lock, timeout);
     
-    // Wait for items to be added
-    while (_queue.size() == 0 && !_canceled) {
-      if(!_notEmpty.wait(timeout))
-        throw Timeout_Exception();
-    }
+        // Wait for items to be added
+        while (_queue.size() == 0 && !_canceled) {
+          if(!_notEmpty.wait(timeout))
+            throw Timeout_Exception();
+        }
 
-    if(_queue.size() == 0)  // Queue canceled
-      throw Cancellation_Exception();  
+        if(_queue.size() == 0)  // Queue canceled
+          throw Cancellation_Exception();  
 
-    T item = _queue.front();
-    _queue.pop_front();
+        T item = _queue.front();
+        _queue.pop_front();
 
-    _notFull.signal(); // Wake add() waiters
+        _notFull.signal(); // Wake add() waiters
 
-    if(_queue.size() == 0) // Wake empty() waiters
-      _isEmpty.broadcast();
+        if(_queue.size() == 0) // Wake empty() waiters
+          _isEmpty.broadcast();
     
-    return item;
+        return item;
     
-  }
+      }
 
-  /**
-   * Cancel this queue. 
-   *
-   * This method will block the calling thread until exclusive access to 
-   * the Queue can be obtained or until an exception is thrown.
-   *
-   * @see Queue::cancel()
-   *
-   * @post If threads are blocked on a next(), empty() or size() method, 
-   * they will awakend
-   */
-  virtual void cancel() 
-    /* throw(Synchronization_Exception) */ {
-
-    Guard<LockType> g(_lock);
-
-    _canceled = true;
-    _notEmpty.broadcast(); // Wake next() waiters
-
-  }
-
-  /**
-   * Determine if this Queue has been cancel()ed.
-   *
-   * This method will block the calling thread until exclusive access to 
-   * the Queue can be obtained or until an exception is thrown.
-   *
-   * @return bool true if cancel() was called prior to this method, otherwise false.
-   * 
-   * @see Queue::isCanceled()
-   */
-  virtual bool isCanceled()
-    /* throw(Synchronization_Exception) */ {
-
-    // Faster check since the Queue will not become un-canceled
-    if(_canceled)
-      return true;
+      /**
+       * Cancel this queue. 
+       *
+       * This method will block the calling thread until exclusive access to 
+       * the Queue can be obtained or until an exception is thrown.
+       *
+       * @see Queue::cancel()
+       *
+       * @post If threads are blocked on a next(), empty() or size() method, 
+       * they will awakend
+       */
+      virtual void cancel() {
     
-    Guard<LockType> g(_lock);
+        Guard<LockType> g(_lock);
 
-    return _canceled;
+        _canceled = true;
+        _notEmpty.broadcast(); // Wake next() waiters
 
-  }
+      }
 
-  /**
-   * Count the items present in this Queue. 
-   *
-   * This method will not block the calling thread.
-   *
-   * @return size_t number of elements available in the Queue. These are
-   * retrievable through the next() methods.
-   *
-   * @see Queue::size()
-   */
-  virtual size_t size()
-    /* throw(Synchronization_Exception) */ {
+      /**
+       * Determine if this Queue has been cancel()ed.
+       *
+       * This method will block the calling thread until exclusive access to 
+       * the Queue can be obtained or until an exception is thrown.
+       *
+       * @return bool true if cancel() was called prior to this method, otherwise false.
+       * 
+       * @see Queue::isCanceled()
+       */
+      virtual bool isCanceled() {
 
-    Guard<LockType> g(_lock);
-    return _queue.size();
-
-  }
-
-  /**
-   * Count the items present in this Queue. 
-   *
-   * This method will not block the calling thread.
-   *
-   * @param timeout - maximum amount of time (millseconds) this method could block
-   *
-   * @return size_t number of elements available in the Queue. These are
-   * retrievable through the next() methods.
-   *
-   * @see Queue::size(unsigned long)
-   */
-  virtual size_t size(unsigned long timeout)
-    /* throw(Synchronization_Exception) */ {
-
-    Guard<LockType> g(_lock, timeout);
-    return _queue.size();
-
-  }
-
-  /**
-   * Test this Queue to see if it is empty. This will block the calling
-   * thread <i>until</i> the Queue becomes empty.
-   * 
-   * @return boolean  true if empty, otherwise false
-   *
-   * @exception Cancellation_Exception should not be thrown. A cancel()ed
-   * Queue that contains no more elements should report that it is 
-   * empty.
-   * @exception Interrupted_Exception thrown if the the method is invoked from the 
-   * context of a thread that has been interrupt()ed.
-   * @exception Timeout_Exception thrown if the given amount
-   * of time has expired before an item becomes available
-   * @exception Synchronization_Exception thrown if there is some error in
-   * counting the items.
-   *
-   * @see Queue::empty()
-   */
-  virtual bool empty() 
-    /* throw(Synchronization_Exception) */ {
-
-
-    Guard<LockType> g(_lock);
-
-    while(_queue.size() > 0) // Wait for an empty signal
-      _isEmpty.wait();
+        // Faster check since the Queue will not become un-canceled
+        if(_canceled)
+          return true;
     
-    return true;
+        Guard<LockType> g(_lock);
 
+        return _canceled;
 
-  }
+      }
 
-  /**
-   * Test this Queue to see if it is empty. This will block the calling
-   * thread <i>until</i> the Queue becomes empty.
-   * 
-   * @param timeout - maximum amount of time (millseconds) this method could block
-   *
-   * @return boolean  true if empty, otherwise false
-   *
-   * @exception Cancellation_Exception should not be thrown. A cancel()ed
-   * Queue that contains no more elements should report that it is 
-   * empty.
-   * @exception Interrupted_Exception thrown if the the method is invoked from the 
-   * context of a thread that has been interrupt()ed.
-   * @exception Timeout_Exception thrown if the given amount
-   * of time has expired before an item becomes available
-   * @exception Synchronization_Exception thrown if there is some error in
-   * counting the items.
-   *
-   * @see Queue::empty(unsigned long)
-   */
-  virtual bool empty(unsigned long timeout) 
-    /* throw(Synchronization_Exception) */ {
+      /**
+       * Count the items present in this Queue. 
+       *
+       * This method will not block the calling thread.
+       *
+       * @return size_t number of elements available in the Queue. These are
+       * retrievable through the next() methods.
+       *
+       * @see Queue::size()
+       */
+      virtual size_t size() {
+  
+        Guard<LockType> g(_lock);
+        return _queue.size();
 
+      }
 
-    Guard<LockType> g(_lock, timeout);
+      /**
+       * Count the items present in this Queue. 
+       *
+       * This method will not block the calling thread.
+       *
+       * @param timeout - maximum amount of time (millseconds) this method could block
+       *
+       * @return size_t number of elements available in the Queue. These are
+       * retrievable through the next() methods.
+       *
+       * @see Queue::size(unsigned long)
+       */
+      virtual size_t size(unsigned long timeout) {
 
-    while(_queue.size() > 0) // Wait for an empty signal
-      _isEmpty.wait(timeout);
+        Guard<LockType> g(_lock, timeout);
+        return _queue.size();
+
+      }
+
+      /**
+       * Test this Queue to see if it is empty. This will block the calling
+       * thread <i>until</i> the Queue becomes empty.
+       * 
+       * @return boolean  true if empty, otherwise false
+       *
+       * @exception Cancellation_Exception should not be thrown. A cancel()ed
+       * Queue that contains no more elements should report that it is 
+       * empty.
+       * @exception Interrupted_Exception thrown if the the method is invoked from the 
+       * context of a thread that has been interrupt()ed.
+       * @exception Timeout_Exception thrown if the given amount
+       * of time has expired before an item becomes available
+       * @exception Synchronization_Exception thrown if there is some error in
+       * counting the items.
+       *
+       * @see Queue::empty()
+       */
+      virtual bool empty() {
+
+        Guard<LockType> g(_lock);
+
+        while(_queue.size() > 0) // Wait for an empty signal
+          _isEmpty.wait();
     
-    return true;
+        return true;
 
 
-  }
+      }
 
-};
+      /**
+       * Test this Queue to see if it is empty. This will block the calling
+       * thread <i>until</i> the Queue becomes empty.
+       * 
+       * @param timeout - maximum amount of time (millseconds) this method could block
+       *
+       * @return boolean  true if empty, otherwise false
+       *
+       * @exception Cancellation_Exception should not be thrown. A cancel()ed
+       * Queue that contains no more elements should report that it is 
+       * empty.
+       * @exception Interrupted_Exception thrown if the the method is invoked from the 
+       * context of a thread that has been interrupt()ed.
+       * @exception Timeout_Exception thrown if the given amount
+       * of time has expired before an item becomes available
+       * @exception Synchronization_Exception thrown if there is some error in
+       * counting the items.
+       *
+       * @see Queue::empty(unsigned long)
+       */
+      virtual bool empty(unsigned long timeout) {
+
+        Guard<LockType> g(_lock, timeout);
+
+        while(_queue.size() > 0) // Wait for an empty signal
+          _isEmpty.wait(timeout);
+    
+        return true;
+
+      }
+
+    }; /* BoundedQueue */
 
 } // namespace ZThread
 

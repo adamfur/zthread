@@ -46,8 +46,8 @@ namespace ZThread {
 
 /**
  * @class LocalStaticInstantiation
- * @author Eric Crahen <crahen at code-foo dot com>
- * @date <2002-12-21T13:22:09-0500>
+ * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @date <2003-07-07T11:40:57-0400>
  * @version 2.2.0 
  *
  * The LocalStaticInstantiation policy allows the creation 
@@ -91,8 +91,8 @@ class StaticInstantiationHelper {
 
 /**
  * @class StaticInstantiation
- * @author Eric Crahen <crahen at code-foo dot com>
- * @date <2002-12-21T13:22:09-0500>
+ * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @date <2003-07-07T11:40:57-0400>
  * @version 2.2.0 
  *
  * The StaticInstantiation policy allows the creation 
@@ -150,8 +150,8 @@ Destroyer<T>::~Destroyer() {
 
 /**
  * @class LazyInstantiation
- * @author Eric Crahen <crahen at code-foo dot com>
- * @date <2002-12-21T13:22:09-0500>
+ * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @date <2003-07-07T11:40:57-0400>
  * @version 2.2.0
  *
  * The LazyInstantiation policy allows the creation 
@@ -184,8 +184,8 @@ protected:
   
 /**
  * @class Singleton
- * @author Eric Crahen <crahen at code-foo dot com>
- * @date <2002-12-21T13:22:09-0500>
+ * @author Eric Crahen <crahen@cse.buffalo.edu>
+ * @date <2003-07-07T11:40:57-0400>
  * @version 2.2.0 
  *
  * Based on the work of John Vlissidles in his book 'Pattern Hatching'

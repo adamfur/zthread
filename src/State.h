@@ -30,25 +30,21 @@ namespace ZThread {
 /**
  * @class State 
  * @author Eric Crahen <crahen@cse.buffalo.edu>
- * @date <2003-06-30T03:17:07-0400>
+ * @date <2003-07-07T09:52:11-0400>
  * @version 2.2.1
  *
  * Class to encapsulte the current state of the threads life-cycle.
  */
 class State {
+ public:
 
   //! Various states
   typedef enum { REFERENCE, IDLE, RUNNING, JOINED } STATE;
 
-  //! Current state
-  STATE _state;
-
- public:
-
   /**
    * Create State with the given flag set.
    */
-  State(STATE s=IDLE) : _state(s) {}
+  State(STATE initialState) : _state(initialState) {}
 
   /**
    * Test for the IDLE state. No task has yet run.
@@ -143,6 +139,11 @@ class State {
     return true;
 
   }
+
+ private:
+
+  //! Current state
+  STATE _state;
 
 };
 

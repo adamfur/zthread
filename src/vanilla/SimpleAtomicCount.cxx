@@ -23,7 +23,9 @@
 #ifndef __ZTATOMICCOUNTIMPL_H__
 #define __ZTATOMICCOUNTIMPL_H__
 
+#include "zthread/Guard.h"
 #include "../FastLock.h"
+
 #include <assert.h>
 
 namespace ZThread {
@@ -53,29 +55,45 @@ AtomicCount::~AtomicCount() {
 
 }
   
-void AtomicCount::increment() {
+//! Postfix decrement and return the current value
+size_t AtomicCount::operator--(int) {
 
   ATOMIC_COUNT* c = reinterpret_cast<ATOMIC_COUNT*>(_value);
   
-  c->lock.acquire();
-  ++c->count;
-  c->lock.release();  
-  
+  Guard<FastLock> g(c->lock);
+  return c->count--;
+
 }
   
-bool AtomicCount::decrement() {
+//! Postfix increment and return the current value
+size_t AtomicCount::operator++(int) {
 
   ATOMIC_COUNT* c = reinterpret_cast<ATOMIC_COUNT*>(_value);
-  bool n;
-
-  c->lock.acquire();
-  n = (--c->count == 0);
-  c->lock.release();  
-
-  return n;
   
+  Guard<FastLock> g(c->lock);
+  return c->count++;
+
 }
- 
+
+//! Prefix decrement and return the current value
+size_t AtomicCount::operator--() {
+
+  ATOMIC_COUNT* c = reinterpret_cast<ATOMIC_COUNT*>(_value);
+  
+  Guard<FastLock> g(c->lock);
+  return --c->count;
+
+}
+  
+//! Prefix increment and return the current value
+size_t AtomicCount::operator++() {
+  
+  ATOMIC_COUNT* c = reinterpret_cast<ATOMIC_COUNT*>(_value);
+  
+  Guard<FastLock> g(c->lock);
+  return ++c->count;
+
+}
 
 };
 

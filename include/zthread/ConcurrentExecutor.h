@@ -22,7 +22,6 @@
 #ifndef __ZTCONCURRENTEXECUTOR_H__
 #define __ZTCONCURRENTEXECUTOR_H__
 
-#include "zthread/DefaultThreadFactory.h"
 #include "zthread/Executor.h"
 #include "zthread/MonitoredQueue.h"
 #include "zthread/CountedPtr.h"
@@ -34,160 +33,138 @@
 
 namespace ZThread {
 
-/**
- * @class ConcurrentExecutor
- *
- * @author Eric Crahen <crahen@cse.buffalo.edu>
- * @date <2003-06-30T08:14:28-0400>
- * @version 2.2.2
- *
- * This is an Executor that will run submitted tasks in another 
- * thread. Only one thread is used per ConcurrentExecutor. The
- * PoolExecutor will allow you to create an Executor that will
- * service tasks with one or more threads.
- *
- * @see Executor
- */
-template <
-  class LockType = Mutex, 
-  class QueueType = MonitoredQueue<RunnableHandle*, LockType>, 
-  typename RefType = CountedPtr<QueueType> 
->
-class ConcurrentExecutor : public Executor {
+  /**
+   * @class ConcurrentExecutor
+   *
+   * @author Eric Crahen <crahen@cse.buffalo.edu>
+   * @date <2003-07-07T22:19:53-0400>
+   * @version 2.3.0
+   *
+   * This is an Executor that will run submitted tasks in another 
+   * thread. Only one thread is used per ConcurrentExecutor. The
+   * PoolExecutor will allow you to create an Executor that will
+   * service tasks with one or more threads.
+   *
+   * @see Executor
+   */
+  template <
+    class LockType = Mutex, 
+    class QueueType = MonitoredQueue<Task, LockType>, 
+    typename RefType = CountedPtr<QueueType> 
+    >
+    class ConcurrentExecutor : public Executor {
 
-  //! Reference to the Queue 
-  RefType _queue;
+      //! Reference to the Queue 
+      RefType _queue;
 
-  //! Helper class
-  class Worker : public Runnable {
+      //! Helper class
+      class Worker : public Runnable {
 
-    RefType _queue;
+        RefType _queue;
 
-  public:
+      public:
 
-    //! Create a Worker that draws upon the given Queue
-    Worker(RefType& q) : _queue(q) { }
+        //! Create a Worker that draws upon the given Queue
+        Worker(RefType& q) : _queue(q) { }
     
-    //! Destroy the Worker
-    virtual ~Worker() throw() { }
+        //! Destroy the Worker
+        virtual ~Worker() { }
 
-    //! Run until interrupted
-    virtual void run() throw() {
+        //! Run until interrupted
+        virtual void run() {
 
-      RunnableHandle* task = 0;
-
-      try {
+          try {
         
-        while(!Thread::canceled()) { 
+            while(!Thread::canceled()) { 
           
-          // Draw tasks from the queue
-          task = _queue->next();
-          (*task)->run();
+              // Draw tasks from the queue
+              Task task( _queue->next() );
+              task->run();
 
-          delete task;
-          task = 0;
+            } 
 
-        } 
+          } catch(Interrupted_Exception&) {
+            // Thread canceled while drawing from the Queue
+          } catch(Cancellation_Exception&) { 
+            // Queue has emptied.
+          } catch(...) {
+            assert(0);
+          }
 
-      } catch(Interrupted_Exception&) {
-        // Thread canceled while drawing from the Queue
-      } catch(Cancellation_Exception&) { 
-        // Queue has emptied.
-      } catch(...) {
-        assert(0);
+        }
+
+      }; /* Worker */
+
+      public:
+
+      //! Create a new ConcurrentExecutor
+      ConcurrentExecutor() : _queue(new QueueType) {
+
+        Thread(new Worker(_queue));
+
       }
 
-      if(task) 
-        delete task;
+      virtual ~ConcurrentExecutor() { }
 
-    }
-
-  }; // Worker
-
-public:
-
-  //! Create a new ConcurrentExecutor
-  ConcurrentExecutor() {
-
-    Thread t;
-    t.run( RunnablePtr(new Worker(_queue)) );
-
-  }
-
-  virtual ~ConcurrentExecutor() throw() { }
-
-  /**
-   * Submit a light wieght task to an Executor. This will not
-   * block the calling thread very long. The submitted task will
-   * be executed at some later point by another thread.
-   * 
-   * @exception Cancellation_Exception thrown if a task is submited when 
-   * the executor has been canceled.
-   * @exception Synchronization_Exception thrown is some other error occurs.
-   *
-   * @see Executor::execute(RunnableHandle&)
-   */
-  virtual void execute(const RunnableHandle& task)
-    /* throw(Synchronization_Exception) */ {
-
-    // Canceled Executors will not accept new tasks
-    if(_queue->isCanceled()) 
-      throw Cancellation_Exception();
-
-    // Enqueue the task
-    _queue->add(new RunnableHandle(task)); 
-
-  }
-
-  /**
-   * Convience method
-   *
-   * @see Executor::execute(const RunnableHandle&)
-   */
-  void execute(Runnable* task) {
-
-    execute( RunnablePtr(task) );
-    
-  }
-
-
-  /**
-   * @see Executor::cancel()
-   */
-  virtual void cancel() {
-      
-    _queue->cancel(); 
-    
-  }
+      /**
+       * Submit a light wieght task to an Executor. This will not
+       * block the calling thread very long. The submitted task will
+       * be executed at some later point by another thread.
+       * 
+       * @exception Cancellation_Exception thrown if a task is submited when 
+       * the executor has been canceled.
+       * @exception Synchronization_Exception thrown is some other error occurs.
+       *
+       * @see Executor::execute(RunnableHandle&)
+       */
+      virtual void execute(const Task& task) {
   
-  /**
-   * @see Executor::isCancel()
-   */
-  virtual bool isCanceled() {
+        // Canceled Executors will not accept new tasks
+        if(_queue->isCanceled()) 
+          throw Cancellation_Exception();
 
-    return _queue->isCanceled(); 
+        // Enqueue the task
+        _queue->add(task); 
+
+      }
+
+      /**
+       * @see Executor::cancel()
+       */
+      virtual void cancel() {
+      
+        _queue->cancel(); 
     
-  }
+      }
+  
+      /**
+       * @see Executor::isCancel()
+       */
+      virtual bool isCanceled() {
+
+        return _queue->isCanceled(); 
+    
+      }
  
-  /**
-   * @see Executor::wait()
-   */
-  virtual void wait() {
+      /**
+       * @see Executor::wait()
+       */
+      virtual void wait() {
       
-    _queue->empty();
+        _queue->empty();
       
-  }
+      }
 
-  /**
-   * @see Executor::wait(unsigned long)
-   */
-  virtual bool wait(unsigned long timeout) {
+      /**
+       * @see Executor::wait(unsigned long)
+       */
+      virtual bool wait(unsigned long timeout) {
     
-    return _queue->empty(timeout); 
+        return _queue->empty(timeout); 
     
-  }
+      }
   
-};
+    }; /* ConcurrentExecutor */
 
 } // namespace ZThread
 

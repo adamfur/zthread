@@ -7,17 +7,17 @@
 using namespace ZThread;
 using namespace std;
 
-class Task : public Runnable {
+class Task0 : public Runnable {
 
   int countDown;
 
 public:
 
-  Task(int n) : countDown(n) {}
+  Task0(int n) : countDown(n) {}
 
-  virtual ~Task() throw() { }
+  virtual ~Task0() { }
 
-  virtual void run() throw() {
+  virtual void run() {
 
     while(countDown--) 
       cout << countDown << endl;
@@ -35,7 +35,7 @@ int main() {
   try {
 
     for(int i = 0; i < 5; i++)
-      executor.execute( new Task(10) );
+      executor.execute( new Task0(10) );
 
     executor.cancel();
 

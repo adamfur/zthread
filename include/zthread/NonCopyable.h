@@ -24,35 +24,35 @@
 
 namespace ZThread {
 
-/**
- * @class NonCopyable
- * @author Eric Crahen <zthread@code-foo.com>
- * @date <2002-05-30T08:34:02-0400>
- * @version 2.2.11
- *
- * Some objects kind of objects should not be copied. This is particularly true
- * of objects involved in providing mutually exclusive access to something
- * (e.g. Mutexes, Queues, Semaphores, etc.)
- *
- * Based on Dave Abrahams contribution to the Boost library.
- */
-class NonCopyable {
+  /**
+   * @class NonCopyable
+   * @author Eric Crahen <crahen@cse.buffalo.edu>
+   * @date <2003-07-07T21:56:49-0400>
+   * @version 2.2.11
+   *
+   * Some objects kind of objects should not be copied. This is particularly true
+   * of objects involved in providing mutually exclusive access to something
+   * (e.g. Mutexes, Queues, Semaphores, etc.)
+   *
+   * Based on Dave Abrahams contribution to the Boost library.
+   */
+  class NonCopyable {
 
-  //! Restrict the copy constructor
-  NonCopyable(const NonCopyable&);
+    //! Restrict the copy constructor
+    NonCopyable(const NonCopyable&);
 
-  //! Restrict the assignment operator
-  const NonCopyable& operator=(const NonCopyable&);
+    //! Restrict the assignment operator
+    const NonCopyable& operator=(const NonCopyable&);
 
-protected:
+  protected:
 
-  //! Create a NonCopyable object
-  NonCopyable() { }
+    //! Create a NonCopyable object
+    NonCopyable() { }
 
-  //! Destroy a NonCopyable object
-  ~NonCopyable() { }
+    //! Destroy a NonCopyable object
+    ~NonCopyable() { }
 
-};
+  }; /* NonCopyable */
 
 } // namespace ZThread
 

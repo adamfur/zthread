@@ -25,187 +25,98 @@
 
 namespace ZThread {
   
-/**
- * @class Holder
- *
- * @author Eric Crahen <crahen@cse.buffalo.edu>
- * @date <2003-06-29T21:22:12-0400>
- * @version 2.2.11
- *
- * Holders are used to create submit tasks to a thread without
- * transfering thier ownership to the enclosing Handle(s).
- */
-template <typename T>
-class Holder : public Runnable {
-
-  Runnable& _task;
   
- public:
+  Thread::Thread() 
+    : _impl( ThreadImpl::current() ) { 
+
+    // ThreadImpl's start out life with a reference count 
+    // of one, and the they are added to the ThreadQueue.
+    _impl->addReference();
+    
+  }
+
+  Thread::Thread(const Task& task, bool autoCancel)
+    : _impl( new ThreadImpl(task, autoCancel) ) { 
+    
+    _impl->addReference();
+    
+  }
+
+  bool Thread::operator==(const Thread& t) const {
+    return (t._impl == _impl);
+  }
+
+  Thread::~Thread() {
+
+    _impl->delReference();
+
+  }
+
+  bool Thread::join(unsigned long timeout) {
+
+    return _impl->join(timeout);
+
+  }
+
+  bool Thread::interrupted() {
+
+    return ThreadImpl::current()->isInterrupted();
+
+  }
+
+
+  bool Thread::canceled() {
+
+    return ThreadImpl::current()->isCanceled();
+
+  }
+
+  void Thread::setPriority(Priority n) {
+
+    _impl->setPriority(n);
+
+  }
+
+
+  Priority Thread::getPriority() {
+
+    return _impl->getPriority();
+
+  }
+
+  bool Thread::interrupt() {
+
+    return _impl->interrupt();
+
+  }
   
-  /**
-   * Create a new Holder, wrapping the given reference.
-   *
-   * @param task Runnable& reference to wrap
-   */
-  explicit Holder(Runnable& task) : _task(task) { }
-  
-  //!
-  virtual ~Holder() throw();
-  
-  //!
-  virtual void run() throw();
+  void Thread::cancel() {
 
-}; // Holder
- 
+    if(ThreadImpl::current() == _impl)
+      throw InvalidOp_Exception();
 
-template<typename T>
-Holder<T>::~Holder() throw() { }
+    _impl->cancel();
 
-template<typename T>
-void Holder<T>::run() throw() {
-  _task.run();
-}
+  } 
 
-//! Generate a Handle and a Holder for some Runnable object
-template<typename T>
-Handle< Holder<T> > RunnablePtr(T& t) { 
-  return Handle< Holder<T> >(new Holder<T>(t)); 
-}
+  bool Thread::isCanceled() {
 
-  
-void Thread::Reference::interrupt() 
-  throw() {
+    return _impl->isCanceled();
 
-  _impl->interrupt();
+  }
 
-}
 
+  void Thread::sleep(unsigned long ms) {
 
-void Thread::Reference::setPriority(Priority p) 
-  throw() {
+    ThreadImpl::sleep(ms);
 
-  _impl->setPriority(p);
+  }
 
-}
 
+  void Thread::yield() {
 
-Priority Thread::Reference::getPriority() 
-  throw() {
+    ThreadImpl::yield();
 
-  return _impl->getPriority();
-  
-}
-
-  
-//ThreadLocal<void*> Thread::_interruptKey;
-
-Thread::Thread() : _impl(new ThreadImpl) { }
-
-Thread::~Thread() 
-  throw() {
-
-  // Decrement the reference count
-  _impl->delReference();
-
-}
-
-bool Thread::join(unsigned long timeout) 
-  /* throw(Synchronization_Exception) */ {
-
-  return _impl->join(timeout);
-
-}
-
-void Thread::run() throw() { /* NOOP */ }
-
-void Thread::start() {
-
-  run( RunnablePtr(*this) );
-
-}
-
-void Thread::run(const RunnableHandle& task) {
-
-  _impl->run(task);
-
-}
-
-Thread::Reference Thread::current() 
-  throw() {
-
-  return Reference( ThreadImpl::current() );
-
-}
-
-
-bool Thread::interrupted() 
-  throw() {
-
-  return ThreadImpl::current()->isInterrupted();
-
-}
-
-
-bool Thread::canceled() 
-  throw() {
-
-  return ThreadImpl::current()->isCanceled();
-
-}
-
-void Thread::setPriority(Priority n) 
-  throw() {
-
-  _impl->setPriority(n);
-
-}
-
-
-Priority Thread::getPriority() 
-  throw() {
-
-  return _impl->getPriority();
-
-}
-
-bool Thread::interrupt() 
-  throw() {
-
-  return _impl->interrupt();
-
-}
-  
-void Thread::cancel() 
-  /* throw(Synchronization_Exception) */ {
-
-  if(ThreadImpl::current() == _impl)
-    throw InvalidOp_Exception();
-
-  _impl->cancel();
-
-} 
-
-bool Thread::isCanceled() 
-  /* throw(Synchronization_Exception) */ {
-
-  return _impl->isCanceled();
-
-}
-
-
-void Thread::sleep(unsigned long ms) 
- /* throw(Synchronization_Exception) */ {
-
-  ThreadImpl::sleep(ms);
-
-}
-
-
-void Thread::yield() 
-  throw() {
-
-  ThreadImpl::yield();
-
-}
+  }
 
 } // namespace ZThread 
