@@ -1,4 +1,4 @@
-r/*
+/*
  *  ZThreads, a platform-independent, multi-threading and 
  *  synchronization library
  *
@@ -30,7 +30,7 @@ namespace ZThread {
    * @class ThreadLocal
    *
    * @author Eric Crahen <crahen@cse.buffalo.edu>
-   * @date <2003-07-26T15:14:22-0400>
+   * @date <2003-07-27T10:19:22-0400>
    * @version 2.3.0
    *
    * Provides access to store and retrieve value types to and from a thread local 
@@ -58,6 +58,167 @@ namespace ZThread {
    *
    * - Inheritance can be controlled explicitly by the user through a third functor, 
    *   InheritableValueT.
+   *
+   * <h3>Examples</h3>
+   *
+   *
+   * A ThreadLocal that does not inherit, and uses the default value
+   * for an int as its initial value. 
+   *
+   * @code 
+   *
+   * #include "zthread/ThreadLocal.h"
+   * #include "zthread/Thread.h"
+   * #include <iostream>
+   *
+   * using namespace ZThread;
+   *
+   * class aRunnable : public Runnable {
+   *   ThreadLocal<int> localValue;
+   * public:
+   *   void run() {
+   *     std::cout << localValue.get() << std::endl; 
+   *   }
+   * };
+   *
+   * int main() {
+   *
+   *   // Create a shared task to display ThreadLocal values
+   *   Task task(new aRunnable);
+   *
+   *   Thread t0(task); t0.wait();
+   *   Thread t1(task); t1.wait();
+   *   Thread t2(task); t2.wait();
+   *
+   *   // Output:
+   *
+   *   // 0
+   *   // 0
+   *   // 0
+   *
+   * }
+   *
+   * @endcode
+   *
+   *
+   * A ThreadLocal that does not inherit, and uses a custom initial value.
+   *
+   * @code 
+   *
+   * #include "zthread/ThreadLocal.h"
+   * #include "zthread/Thread.h"
+   * #include <iostream>
+   *
+   * using namespace ZThread;
+   *
+   * struct anInitialValueFn {
+   *   int operator()() { 
+   *     static int next = 100;
+   *     int val = next; next += 100;
+   *     return val; 
+   *   }
+   * };
+   *
+   * class aRunnable : public Runnable {
+   *   ThreadLocal<int, anInitialValueFn> localValue;
+   * public:
+   *   void run() {
+   *     std::cout << localValue.get() << std::endl; 
+   *   }
+   * };
+   *
+   * int main() {
+   *
+   *   // Create a shared task to display ThreadLocal values
+   *   Task task(new aRunnable);
+   *
+   *   Thread t0(task); t0.wait();
+   *   Thread t1(task); t1.wait();
+   *   Thread t2(task); t2.wait();
+   *
+   *   // Output:
+   *
+   *   // 100
+   *   // 200
+   *   // 300
+   *
+   * }
+   *
+   * @endcode
+   *
+   *
+   * A ThreadLocal that does inherit and modify child values. 
+   * (The default initial value functor is used)
+   *
+   * @code 
+   *
+   * #include "zthread/ThreadLocal.h"
+   * #include "zthread/Thread.h"
+   * #include <iostream>
+   *
+   * using namespace ZThread;
+   *
+   * struct anInheritedValueFn {
+   *   int operator()(int val) { 
+   *     return val + 100; 
+   *   }
+   * };
+   *
+   * // This Runnable associates no ThreadLocal value in the main thread; so 
+   * // none of the child threads have anything to inherit.
+   * class aRunnable : public Runnable {
+   *   ThreadLocal<int, ThreadLocalImpl::InitialValueFn<int>, anInheritedValueFn> localValue;
+   * public:
+   *   void run() {
+   *     std::cout << localValue.get() << std::endl; 
+   *   }
+   * };
+   *
+   * // This Runnable associates a ThreadLocal value in the main thread which
+   * // is inherited when the child threads are created.
+   * class anotherRunnable : public Runnable {
+   *   ThreadLocal<int, ThreadLocalImpl::InitialValueFn<int>, anInheritedValueFn> localValue;
+   * public:
+   *   anotherRunnable() { 
+   *     localValue.set(100);
+   *   }
+   *   void run() {
+   *     std::cout << localValue.get() << std::endl; 
+   *   }
+   * };
+   *
+   * int main() {
+   *
+   *   // Create a shared task to display ThreadLocal values
+   *   Task task(new aRunnable);
+   *
+   *   Thread t0(task); t0.wait();
+   *   Thread t1(task); t1.wait();
+   *   Thread t2(task); t2.wait();
+   *
+   *   // Output:
+   *
+   *   // 0
+   *   // 0
+   *   // 0
+   *
+   *   task = Task(new anotherRunnable);
+   *
+   *   Thread t10(task); t10.wait();
+   *   Thread t11(task); t11.wait();
+   *   Thread t12(task); t12.wait();
+   *
+   *   // Output:
+   *
+   *   // 200
+   *   // 200
+   *   // 200
+   *
+   * }
+   *
+   * @endcode
+   *
+   * <h3>Parameters</h3>
    *
    * <em>InitialValueT</em>
    *
@@ -111,7 +272,7 @@ namespace ZThread {
     typename ChildValueT        = ThreadLocalImpl::UniqueChildValueFn, 
     typename InheritableValueT  = ThreadLocalImpl::InheritableValueFn
     >
-    class ThreadLocal : public ThreadLocalImpl {
+    class ThreadLocal : private ThreadLocalImpl {
 
       typedef ThreadLocalImpl::ValuePtr ValuePtr;
 
@@ -178,6 +339,28 @@ namespace ZThread {
      */
     void set(T v) const {
       reinterpret_cast<Value&>( *value(&createValue) ) = v;
+    }
+
+    /**
+     * Remove any value current associated with this ThreadLocal. 
+     * 
+     * @post Upon thier next invocation the get() and set() functions will behave as 
+     *       if no value has been associated with this ThreadLocal and an 
+     *       initial value will be generated.
+     */
+    void clear() const {
+      ThreadLocalImpl::clear();
+    }
+
+    /**
+     * Remove any value current associated with <em>any</em> ThreadLocal. 
+     * 
+     * @post Upon thier next invocation the get() and set() functions will behave as 
+     *       if no value has been associated with <em>any</em> ThreadLocal and new 
+     *       initial values will be generated.
+     */
+    static void clearAll() {
+      ThreadLocalImpl::clearAll();
     }
 
   };
