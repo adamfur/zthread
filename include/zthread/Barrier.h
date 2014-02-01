@@ -56,7 +56,7 @@ namespace ZThread {
    *
    * A Barrier will remain 'broken', until it is manually reset().
    */
-  template <unsigned int Count, class LockType>
+  template <class LockType>
     class Barrier : public Waitable, private NonCopyable {
 
     //! Broken flag
@@ -65,6 +65,7 @@ namespace ZThread {
     bool _haveTask;
     //! Thread count
     unsigned int _count;
+    unsigned int _resetCount;
     //! Wait generation
     unsigned int _generation;
     //! Serialize access
@@ -77,8 +78,8 @@ namespace ZThread {
     public:
 
     //! Create a Barrier
-    Barrier() 
-      : _broken(false), _haveTask(false), _count(Count), _generation(0), _arrived(_lock), _task(0) { }
+    Barrier(int count) 
+      : _broken(false), _haveTask(false), _count(count), _resetCount(count), _generation(0), _arrived(_lock), _task(0) { }
 
     /**
      * Create a Barrier that executes the given task when all threads arrive
@@ -86,8 +87,8 @@ namespace ZThread {
      *
      * @param task Task to associate with this Barrier
      */
-    Barrier(const Task& task) 
-      : _broken(false), _haveTask(true), _count(Count), _generation(0), _arrived(_lock), 
+    Barrier(const Task& task, int count) 
+      : _broken(false), _haveTask(true), _count(count), _resetCount(count), _generation(0), _arrived(_lock), 
       _task(task) { }
 
     //! Destroy this Barrier
@@ -316,7 +317,7 @@ namespace ZThread {
 
       _broken = false;
       _generation++;
-      _count = Count;
+      _count = _resetCount;
       
     }
 
